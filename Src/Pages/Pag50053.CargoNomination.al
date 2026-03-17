@@ -12,7 +12,8 @@ page 50053 "Cargo Nomination"
     //ModifyAllowed = false;
     //DeleteAllowed = false;
     //SourceTableView = sorting("Job File Date") order(descending);
-    SourceTableView = where(Archived = const(false), "Cargo Status" = filter(<> Cancelled), Nominated = const(false));
+    SourceTableView = where(Archived = const(false), "Cargo Status" = filter(<> 'Cancelled'), Nominated = const(false));
+   // SourceTableView = where(Archived = const(false),Nominated = const(false));
 
     layout
     {
@@ -48,7 +49,7 @@ page 50053 "Cargo Nomination"
                     trigger OnValidate()
                     var
                     begin
-
+CanceledResonUpdate();
                        CurrPage.Update(false);
                     end;
                 }
@@ -365,7 +366,7 @@ page 50053 "Cargo Nomination"
     var
 
     begin
-        if Rec."Cargo Status" = rec."Cargo Status"::Cancelled then
+        if Rec."Cargo Status" = 'CANCELLED' then
             RemarksEdiable := false
         else
             RemarksEdiable := true;
