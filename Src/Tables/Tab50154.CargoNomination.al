@@ -373,24 +373,30 @@ table 50164 "Cargo Nomination"
             Caption = 'Nominated';
             DataClassification = ToBeClassified;
         }
-        field(46; "Cargo Status"; Enum CargoNominationStatus)
+        field(46; "Cargo Status"; Code[30])
         {
             Caption = 'Cargo Status';
             DataClassification = ToBeClassified;
+            TableRelation = "Cargo Nomination Status";
+            // trigger OnValidate()
+            // var
+            //     ChangeLogMgt: Codeunit "Cargo Nomination Change LogMgt";
+            //     OldStatus: Enum "CargoNominationStatus";
+            // begin
+            //     // if Rec."Cargo Status" = Rec."Cargo Status"::Canceled then begin
+            //     //     if not Confirm('Are you sure you want to cancel this nomination?', false) then begin
+            //     //         Rec."Cargo Status" := xRec."Cargo Status";
+            //     //         exit;
+            //     //     end else begin
+            //     //         if StrLen(Rec."Canceled Reason") < 20 then
+            //     //             Error('Cancelled Reason must be at least 20 characters long.');
+            //     //     end;
+            //     //     Rec.Manifested := true;
+            //     // end;
+            // end;
             trigger OnValidate()
-            var
             begin
-                // if Rec."Cargo Status" = Rec."Cargo Status"::Cancelled then begin
-                //     if not Confirm('Are you sure you want to cancel this nomination?', false) then begin
-                //         Rec."Cargo Status" := xRec."Cargo Status";
-                //         exit;
-                //     end else begin
-                //         if StrLen(Rec."Cancelled Reason") < 20 then
-                //             Error('Cancelled Reason must be at least 20 characters long.');
-                //     end;
-                //     Rec.Archived := true;
-                // end;
-                if Rec."Cargo Status" = Rec."Cargo Status"::Cancelled then begin
+                if Rec."Cargo Status" ='CANCELLED' then begin
                     if not Confirm('Are you sure you want to cancel this nomination?', false) then begin
                         Rec."Cargo Status" := xRec."Cargo Status";
                         exit;
@@ -523,7 +529,7 @@ table 50164 "Cargo Nomination"
         IMSSetup.Get();
         CargoNomination.Reset();
         CargoNomination.SetRange(Nominated, false);
-        CargoNomination.SetFilter("Cargo Status", '%1|%2', CargoNominationStatus::"Approved Nomination", CargoNominationStatus::Transfer);
+        CargoNomination.SetFilter("Cargo Status", '%1|%2', 'APPROVED NOMINATION', 'TRANSFER');
         if not CargoNomination.FindSet() then begin
             Error('No Approved Nomination or Transfer records found to process.');
             exit;
