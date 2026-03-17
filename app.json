@@ -2,7 +2,11 @@
   "id": "8b5e999f-4826-4bca-b3fb-1d0c4651d42a",
   "name": "IMS365",
   "publisher": "TechBIZInfotech",
+<<<<<<< HEAD
   "version": "1.0.0.528",
+=======
+  "version": "1.0.0.533",
+>>>>>>> 074ebb18525b2099d2d0f45e758d11a43570b4db
   "brief": "",
   "description": "",
   "privacyStatement": "",
