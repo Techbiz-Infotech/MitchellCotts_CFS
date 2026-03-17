@@ -17,6 +17,7 @@ page 50058 "Empty Container Gatepass"
                 {
                     ToolTip = 'Specifies the value of the Gate Pass No. field.';
                     ApplicationArea = All;
+                    Editable = false;
                     trigger OnAssistEdit()
                     var
                         myInt: Integer;

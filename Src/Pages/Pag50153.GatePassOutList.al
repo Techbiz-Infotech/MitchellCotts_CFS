@@ -4,7 +4,7 @@ page 50153 "Gate Pass Outs"
     Caption = 'Gate Pass Outs';
     PageType = List;
     SourceTable = "Gate Pass Out";
-    SourceTableView = sorting("Gate Pass No.") where("Gate Pass Status" = filter(Active));
+    SourceTableView = sorting("Gate Pass No.") where("Gate Pass Status" = filter(Active), "Shortcut Dimension 6 Code" = filter(<> 'EMPTY'));
     UsageCategory = Lists;
     CardPageId = 50155;
     Editable = false;

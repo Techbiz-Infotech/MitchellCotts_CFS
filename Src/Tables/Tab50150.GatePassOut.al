@@ -438,7 +438,10 @@ table 50150 "Gate Pass Out"
 
                 if EmptyContainerManifest.FindSet() then
                     repeat
-                        if EmptyContainerManifest.Selected then
+                        if EmptyContainerManifest."Shortcut Dimension 6 Code" = 'EMPTY' Then begin
+                            if EmptyContainerManifest.Selected then
+                                InsertEmptyContainerGatePassLine(EmptyContainerManifest);
+                        end else
                             InsertEmptyContainerGatePassLine(EmptyContainerManifest);
                     until EmptyContainerManifest.Next() = 0;
 
@@ -453,20 +456,45 @@ table 50150 "Gate Pass Out"
     var
         GatePassLine: record "Gate Pass Out Line";
         GPHead: record "Gate Pass Out";
-        LineNo: Integer;
+        LineNo1: Integer;
         SalesInvHead: Record "Sales Invoice Header";
         SalesInvLine: Record "Sales Invoice Line";
+        CustLedgerEntry: Record "Cust. Ledger Entry";
+
+        LSalesInvLine, GSalesInvLine : Record "Sales Invoice Line";
+
+        ContainerInvLine: Record "Sales Invoice Line";
+        ContainerRec: Record "Dimension Value";
+        GLSetup: Record "General Ledger Setup";
+        GPLine: Record "Gate Pass Out Line";
+        PostedGateOutHead: Record "Posted Gate Pass Out";
+        PostedGateOutLine: Record "Posted Gate Pass out Line";
+        PaymentTerms, PaymentMethod : Code[20];
+        Cust: Record Customer;
+        BaseOn: Enum "Base On Enum";
+        ChargeGroupHead: Record "Charge ID Group Header";
+        ChargeGroupLine: Record "Charge ID Group Line";
+        BilledStorageDays, RemainingDays, CurrentStorageDays, FreeDays, LineNo : Integer;
+        InvoiceCount: Integer;
+        //ManifestHead: Record "Manifest Header";
+        GManifestLine, TestManifestLine : Record "Manifest Line";
+        ClosedCont: Integer;
+        GPCancelled: Boolean;
+        CancelGatePass: Record "Cancel Gatepass";
+        ChargeIDAssignment: record "Charge ID Assignment";
+        StorageStartDate: Date;
+        PrevDocNo, PrevContainerNo : Code[20];
     begin
         GatePassLine.Reset();
         GatePassLine.SetRange("Gate Pass No.", Rec."Gate Pass No.");
 
         if GatePassLine.FindLast() then
-            LineNo := GatePassLine."Line No." + 10000;
+            LineNo1 := GatePassLine."Line No." + 10000;
 
 
         GatePassLine.Init();
         GatePassLine."Gate Pass No." := Rec."Gate Pass No.";
-        GatePassLine."Line No." := LineNo;
+        GatePassLine."Line No." := LineNo1;
         GatePassLine.Insert();
         if TempManifest."Parent Container ID" <> '' then begin
             SalesInvLine.reset;
@@ -475,7 +503,152 @@ table 50150 "Gate Pass Out"
             if SalesInvLine.FindFirst() then begin
                 GatePassLine."Invoice No." := SalesInvLine."Document No.";
                 GatePassLine."Invoice Date" := SalesInvLine."Posting Date";
-            end;
+                CustLedgerEntry.Reset();
+                CustLedgerEntry.SetRange("Document No.", SalesInvLine."Document No.");
+                CustLedgerEntry.CalcFields("Remaining Amount");
+                CustLedgerEntry.SetFilter("Remaining Amount", '<>%1', 0);
+                if CustLedgerEntry.FindFirst() then begin
+                    if not Rec.Approved then error('Parent Invoice has not been paid');
+                end;
+
+                GPCancelled := false;
+
+                PostedGateOutLine.Reset();
+                PostedGateOutLine.SetRange("BL No.", GPHead."BL No.");
+                PostedGateOutLine.SetRange("Invoice No.", SalesInvLine."Document No.");
+                PostedGateOutLine.SetRange("Global Dimension 1 Code", TempManifest."Global Dimension 1 Code");
+                PostedGateOutLine.SetRange("Gate Pass Status", PostedGateOutLine."Gate Pass Status"::Active);
+
+                if PostedGateOutLine.FindFirst() then begin
+                    CancelGatePass.Reset();
+                    CancelGatePass.SetRange("BL No.", GPHead."BL No.");
+                    CancelGatePass.SetRange("Global Dimension 1 Code", TempManifest."Global Dimension 1 Code");
+
+                    if CancelGatePass.FindFirst() then
+                        GPCancelled := true
+                    else
+                        GPCancelled := false;
+                end else
+                    GPCancelled := true;
+                if GPCancelled then begin
+                    SalesInvHead.Reset();
+                    SalesInvHead.SetRange("No.", SalesInvLine."Document No.");
+                    IF SalesInvHead.FindFirst() then begin
+                        PaymentMethod := SalesInvHead."Payment Method Code";
+                        PaymentTerms := SalesInvHead."Payment Terms Code";
+                        SalesInvHead.CalcFields(Closed);
+                        if not GPHead.Approved then begin
+                            if SalesInvHead.Closed <> true then
+                                Error('Invoice %1 is not paid. Please check and try again', SalesInvHead."No.");
+                        end;
+                    end else begin
+                        PaymentMethod := '';
+                        PaymentTerms := '';
+                    end;
+
+                    GLSetup.Get();
+
+                    ContainerRec.Reset();
+                    ContainerRec.SetRange("Dimension Code", GLSetup."Global Dimension 1 Code");
+                    ContainerRec.SetRange(Code, TempManifest."Global Dimension 1 Code");
+                    ContainerRec.SetRange("Container Status", ContainerRec."Container Status"::"In Stock");
+
+                    if ContainerRec.FindFirst() then begin
+
+                        // ===== Extra Storage Calculation =====
+                        LSalesInvLine.Reset();
+                        LSalesInvLine.SetRange("BL No.", GPHead."BL No.");
+
+                        if LSalesInvLine.FindLast() then
+                            if LSalesInvLine."Posting Date" <> Today then begin
+
+                                GSalesInvLine.Reset();
+                                GSalesInvLine.SetCurrentKey("Document No.");
+                                GSalesInvLine.SetRange("Shortcut Dimension 1 Code", TempManifest."Parent Container ID");
+                                GSalesInvLine.SetFilter("Chargable Storage Days", '<>%1', 0);
+
+                                if GSalesInvLine.FindFirst() then
+                                    repeat
+                                        if PrevDocNo <> GSalesInvLine."Document No." then
+                                            // BilledStorageDays +=
+                                            //   GSalesInvLine."Storage Days" -
+                                            //   GSalesInvLine."Free Days";
+
+                                        PrevDocNo := GSalesInvLine."Document No.";
+                                    until GSalesInvLine.Next() = 0;
+
+                                GSalesInvLine.Reset();
+                                GSalesInvLine.SetRange("Shortcut Dimension 1 Code", TempManifest."Parent Container ID");
+
+                                if GSalesInvLine.FindFirst() then begin
+                                    if ChargeGroupHead.Get(GSalesInvLine."Charge ID") then begin
+                                        BaseOn := ChargeGroupHead."Base On";
+
+
+                                        ChargeIDAssignment.Reset();
+                                        ChargeIDAssignment.SetRange("Customer No.", TempManifest."Consignee No.");
+                                        ChargeIDAssignment.SetRange("Global Dimension 2 Code", TempManifest."Global Dimension 2 Code");
+                                        ChargeIDAssignment.SetRange("Unit Type Container type/Vehic", TempManifest."Container Type");
+                                        ChargeIDAssignment.SetFilter("Shortcut Dimension 5 Code", '<>%1|%2|%3', '20FT,40FT,LOOSE');
+                                        ChargeIDAssignment.SetRange("Clearing Agent Code", TempManifest."Clearing Agent");
+                                        ChargeIDAssignment.SetRange("Destination Local or Transit", TempManifest."Destination Type");
+                                        ChargeIDAssignment.SetFilter("Effective From Date", '<=%1', TempManifest."Date Received");
+                                        if ChargeIDAssignment.FindFirst() then begin
+                                            ChargeIDAssignment.CalcFields(Status);
+                                            if (ChargeIDAssignment.Status <> ChargeIDAssignment.Status::Released) or (ChargeIDAssignment."Assignment Status" <> ChargeIDAssignment."Assignment Status"::Released) then
+                                                Error('Charge Group: %1 Approval Status is %2. \ Charge ID Assignment Approval Status is %3. \ for Container ID: %4. Please contact Group Audit.', ChargeIDAssignment."Charge Id Group Code", ChargeIDAssignment.Status, ChargeIDAssignment."Assignment Status", TempManifest."Container/Chassis No.");
+
+
+
+                                            ChargeGroupLine.Reset();
+                                            ChargeGroupLine.SetRange("Charge ID Group Code",
+                                                                     ChargeIDAssignment."Charge ID Group Code");
+                                            ChargeGroupLine.SetFilter("Free Days", '<>%1', 0);
+
+                                            if ChargeGroupLine.FindFirst() then
+                                                FreeDays := ChargeGroupLine."Free Days"
+                                            else
+                                                FreeDays := 0;
+                                        end;
+                                    end;
+
+                                    case BaseOn of
+                                        BaseOn::"Received Date":
+                                            StorageStartDate := TempManifest."Date Received";
+                                        BaseOn::"ETA Date":
+                                            StorageStartDate := TempManifest."Expected Arrival Date";
+                                        BaseOn::"Last Sling Date":
+                                            StorageStartDate := TempManifest."Last Sling Date";
+                                        BaseOn::ActualDate:
+                                            StorageStartDate := TempManifest."Vessel Arrival Date";
+                                    end;
+
+                                    if StorageStartDate <> 0D then
+                                        CurrentStorageDays := Today - StorageStartDate;
+                                end;
+
+                                if CurrentStorageDays > FreeDays then begin
+                                    RemainingDays :=
+                                      CurrentStorageDays - FreeDays - BilledStorageDays;
+
+                                    Error(
+                                      'Extra storage days to be billed: Please Contact Audit \' +
+                                      'Total Storage Days %1, Free Days %2, ' +
+                                      'Billed Storage Days %3, Remaining Days %4',
+                                      CurrentStorageDays,
+                                      FreeDays,
+                                      BilledStorageDays,
+                                      RemainingDays);
+                                end;
+                            end;
+
+                        // ===== Additional Checks =====
+                        CheckVerificationCharges(TempManifest."Global Dimension 1 Code");
+                        CheckAdditionalCharges(TempManifest."Global Dimension 1 Code");
+                    end;
+                end;
+            end else
+                error('Invoice not found');
         end;
 
 
@@ -611,7 +784,8 @@ table 50150 "Gate Pass Out"
                         TempSelectedContainers."Parent Container ID" := ManifestLine."Parent Container ID";
                         TempSelectedContainers."Container/Chassis No." := ManifestLine."Container/Chassis No.";
                         TempSelectedContainers."Line No." := ManifestLine."Line No.";
-
+                        TempSelectedContainers."Date Received" := ManifestLine."Date Received";
+                        TempSelectedContainers."Clearing Agent" := ManifestLine."Clearing Agent";
                         TempSelectedContainers.Insert();
                     until ManifestLine.Next() = 0;
                 clear(ManifestLookup);

@@ -918,7 +918,7 @@ page 50056 "Manifest lookup"
         ClosedCont: Integer;
         GPCancelled: Boolean;
         CancelGatePass: Record "Cancel Gatepass";
-
+        ChargeIDAssignment: record "Charge ID Assignment";
         StorageStartDate: Date;
         PrevDocNo, PrevContainerNo : Code[20];
     begin
@@ -933,6 +933,7 @@ page 50056 "Manifest lookup"
 
 
             // Check if Parent Invoice was paid.
+
             SalesInvLine.Reset();
             SalesInvLine.SetRange("BL No.", GPHead."BL No.");
             SalesInvLine.CalcFields(Cancelled);
@@ -983,7 +984,7 @@ page 50056 "Manifest lookup"
 
                         ContainerRec.Reset();
                         ContainerRec.SetRange("Dimension Code", GLSetup."Global Dimension 1 Code");
-                        ContainerRec.SetRange(Code, Manifest."Parent Container ID");
+                        ContainerRec.SetRange(Code, Manifest."Global Dimension 1 Code");
                         ContainerRec.SetRange("Container Status", ContainerRec."Container Status"::"In Stock");
 
                         if ContainerRec.FindFirst() then begin
@@ -1003,9 +1004,9 @@ page 50056 "Manifest lookup"
                                     if GSalesInvLine.FindFirst() then
                                         repeat
                                             if PrevDocNo <> GSalesInvLine."Document No." then
-                                                BilledStorageDays +=
-                                                  GSalesInvLine."Storage Days" -
-                                                  GSalesInvLine."Free Days";
+                                                // BilledStorageDays +=
+                                                //   GSalesInvLine."Storage Days" -
+                                                //   GSalesInvLine."Free Days";
 
                                             PrevDocNo := GSalesInvLine."Document No.";
                                         until GSalesInvLine.Next() = 0;
@@ -1016,16 +1017,30 @@ page 50056 "Manifest lookup"
                                     if GSalesInvLine.FindFirst() then begin
                                         if ChargeGroupHead.Get(GSalesInvLine."Charge ID") then begin
                                             BaseOn := ChargeGroupHead."Base On";
+                                            ChargeIDAssignment.Reset();
+                                            ChargeIDAssignment.SetRange("Customer No.", manifest."Consignee No.");
+                                            ChargeIDAssignment.SetRange("Global Dimension 2 Code", manifest."Global Dimension 2 Code");
+                                            ChargeIDAssignment.SetRange("Unit Type Container type/Vehic", manifest."Container Type");
+                                            ChargeIDAssignment.SetFilter("Shortcut Dimension 5 Code", '<>%1|%2|%3', '20FT,40FT,LOOSE');
+                                            ChargeIDAssignment.SetRange("Clearing Agent Code", manifest."Clearing Agent");
+                                            ChargeIDAssignment.SetRange("Destination Local or Transit", manifest."Destination Type");
+                                            ChargeIDAssignment.SetFilter("Effective From Date", '<=%1', manifest."Date Received");
+                                            if ChargeIDAssignment.FindFirst() then begin
+                                                ChargeIDAssignment.CalcFields(Status);
+                                                if (ChargeIDAssignment.Status <> ChargeIDAssignment.Status::Released) or (ChargeIDAssignment."Assignment Status" <> ChargeIDAssignment."Assignment Status"::Released) then
+                                                    Error('Charge Group: %1 Approval Status is %2. \ Charge ID Assignment Approval Status is %3. \ for Container ID: %4. Please contact Group Audit.', ChargeIDAssignment."Charge Id Group Code", ChargeIDAssignment.Status, ChargeIDAssignment."Assignment Status", manifest."Container/Chassis No.");
 
-                                            ChargeGroupLine.Reset();
-                                            ChargeGroupLine.SetRange("Charge ID Group Code",
-                                                                     ChargeGroupHead."Charge ID Group Code");
-                                            ChargeGroupLine.SetFilter("Free Days", '<>%1', 0);
 
-                                            if ChargeGroupLine.FindFirst() then
-                                                FreeDays := ChargeGroupLine."Free Days"
-                                            else
-                                                FreeDays := 0;
+                                                ChargeGroupLine.Reset();
+                                                ChargeGroupLine.SetRange("Charge ID Group Code",
+                                                                         ChargeIDAssignment."Charge ID Group Code");
+                                                ChargeGroupLine.SetFilter("Free Days", '<>%1', 0);
+
+                                                if ChargeGroupLine.FindFirst() then
+                                                    FreeDays := ChargeGroupLine."Free Days"
+                                                else
+                                                    FreeDays := 0;
+                                            end;
                                         end;
 
                                         case BaseOn of
@@ -1234,6 +1249,8 @@ page 50056 "Manifest lookup"
                             Rec."Consignee Name" := ManifestLine."Consignee Name";
                             Rec."Container/Chassis No." := ManifestLine."Container/Chassis No.";
                             Rec."Line No." := ManifestLine."Line No.";
+                            Rec."Date Received" := ManifestLine."Date Received";
+                            Rec."Clearing Agent" := ManifestLine."Clearing Agent";
                             Rec.Insert();
                         until ManifestLine.Next() = 0;
                     end;
