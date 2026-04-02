@@ -998,15 +998,15 @@ page 50056 "Manifest lookup"
 
                                     GSalesInvLine.Reset();
                                     GSalesInvLine.SetCurrentKey("Document No.");
-                                    GSalesInvLine.SetRange("Shortcut Dimension 1 Code", Manifest."Parent Container ID");
+                                    GSalesInvLine.SetRange("Shortcut Dimension 1 Code", Manifest."Global Dimension 1 Code");
                                     GSalesInvLine.SetFilter("Chargable Storage Days", '<>%1', 0);
 
                                     if GSalesInvLine.FindFirst() then
                                         repeat
                                             if PrevDocNo <> GSalesInvLine."Document No." then
-                                                // BilledStorageDays +=
-                                                //   GSalesInvLine."Storage Days" -
-                                                //   GSalesInvLine."Free Days";
+                                                BilledStorageDays +=
+                                                 GSalesInvLine."Storage Days" -
+                                                  GSalesInvLine."Free Days";
 
                                             PrevDocNo := GSalesInvLine."Document No.";
                                         until GSalesInvLine.Next() = 0;
@@ -1021,7 +1021,7 @@ page 50056 "Manifest lookup"
                                             ChargeIDAssignment.SetRange("Customer No.", manifest."Consignee No.");
                                             ChargeIDAssignment.SetRange("Global Dimension 2 Code", manifest."Global Dimension 2 Code");
                                             ChargeIDAssignment.SetRange("Unit Type Container type/Vehic", manifest."Container Type");
-                                            ChargeIDAssignment.SetFilter("Shortcut Dimension 5 Code", '<>%1|%2|%3', '20FT,40FT,LOOSE');
+                                            ChargeIDAssignment.SetRange("Shortcut Dimension 5 Code", Manifest."Shortcut Dimension 5 Code");
                                             ChargeIDAssignment.SetRange("Clearing Agent Code", manifest."Clearing Agent");
                                             ChargeIDAssignment.SetRange("Destination Local or Transit", manifest."Destination Type");
                                             ChargeIDAssignment.SetFilter("Effective From Date", '<=%1', manifest."Date Received");
@@ -1061,15 +1061,15 @@ page 50056 "Manifest lookup"
                                     if CurrentStorageDays > FreeDays then begin
                                         RemainingDays :=
                                           CurrentStorageDays - FreeDays - BilledStorageDays;
-
-                                        Error(
-                                          'Extra storage days to be billed: Please Contact Audit \' +
-                                          'Total Storage Days %1, Free Days %2, ' +
-                                          'Billed Storage Days %3, Remaining Days %4',
-                                          CurrentStorageDays,
-                                          FreeDays,
-                                          BilledStorageDays,
-                                          RemainingDays);
+                                        if RemainingDays > 0 then
+                                            Error(
+                                              'Extra storage days to be billed: Please Contact Audit \' +
+                                              'Total Storage Days %1, Free Days %2, ' +
+                                              'Billed Storage Days %3, Remaining Days %4',
+                                              CurrentStorageDays,
+                                              FreeDays,
+                                              BilledStorageDays,
+                                              RemainingDays);
                                     end;
                                 end;
 
@@ -1233,6 +1233,7 @@ page 50056 "Manifest lookup"
                     ManifestLine.SetRange("BL No.", SalesInvLine."BL No.");
                     ManifestLine.SetFilter("Parent Container ID", '<>%1', '');
                     ManifestLine.SetRange(Released, false);
+                    ManifestLine.SetRange("Container lock", False);
                     if ManifestLine.FindSet() then begin
                         repeat
                             Rec.init();
@@ -1251,6 +1252,8 @@ page 50056 "Manifest lookup"
                             Rec."Line No." := ManifestLine."Line No.";
                             Rec."Date Received" := ManifestLine."Date Received";
                             Rec."Clearing Agent" := ManifestLine."Clearing Agent";
+                            Rec."Destination Type" := ManifestLine."Destination Type";
+                            Rec."Container Type" := ManifestLine."Container Type";
                             Rec.Insert();
                         until ManifestLine.Next() = 0;
                     end;

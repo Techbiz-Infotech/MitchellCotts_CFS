@@ -146,6 +146,12 @@ report 50101 " IMS Copy Sales Document"
                         // SalesHead.Modify();
                     end;
                 end;
+                SalesHead.Reset();
+                SalesHead.SetRange("Document Type", SalesHead."Document Type"::Invoice);
+                SalesHead.SetRange("Proforma No.", FromDocNo);
+                If SalesHead.FindFirst() then begin
+                    Error('Profoma No %1 has already been copied to invoice no %2', FromDocNo, SalesHead."No.");
+                end;
             end;
         end;
     }

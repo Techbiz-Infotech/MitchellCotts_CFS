@@ -564,15 +564,15 @@ table 50150 "Gate Pass Out"
 
                                 GSalesInvLine.Reset();
                                 GSalesInvLine.SetCurrentKey("Document No.");
-                                GSalesInvLine.SetRange("Shortcut Dimension 1 Code", TempManifest."Parent Container ID");
+                                GSalesInvLine.SetRange("Shortcut Dimension 1 Code", TempManifest."Global Dimension 1 Code");
                                 GSalesInvLine.SetFilter("Chargable Storage Days", '<>%1', 0);
 
                                 if GSalesInvLine.FindFirst() then
                                     repeat
                                         if PrevDocNo <> GSalesInvLine."Document No." then
-                                            // BilledStorageDays +=
-                                            //   GSalesInvLine."Storage Days" -
-                                            //   GSalesInvLine."Free Days";
+                                            BilledStorageDays +=
+                                              GSalesInvLine."Storage Days" -
+                                              GSalesInvLine."Free Days";
 
                                         PrevDocNo := GSalesInvLine."Document No.";
                                     until GSalesInvLine.Next() = 0;
@@ -589,7 +589,7 @@ table 50150 "Gate Pass Out"
                                         ChargeIDAssignment.SetRange("Customer No.", TempManifest."Consignee No.");
                                         ChargeIDAssignment.SetRange("Global Dimension 2 Code", TempManifest."Global Dimension 2 Code");
                                         ChargeIDAssignment.SetRange("Unit Type Container type/Vehic", TempManifest."Container Type");
-                                        ChargeIDAssignment.SetFilter("Shortcut Dimension 5 Code", '<>%1|%2|%3', '20FT,40FT,LOOSE');
+                                        ChargeIDAssignment.SetRange("Shortcut Dimension 5 Code", TempManifest."Shortcut Dimension 5 Code");
                                         ChargeIDAssignment.SetRange("Clearing Agent Code", TempManifest."Clearing Agent");
                                         ChargeIDAssignment.SetRange("Destination Local or Transit", TempManifest."Destination Type");
                                         ChargeIDAssignment.SetFilter("Effective From Date", '<=%1', TempManifest."Date Received");
@@ -629,16 +629,16 @@ table 50150 "Gate Pass Out"
 
                                 if CurrentStorageDays > FreeDays then begin
                                     RemainingDays :=
-                                      CurrentStorageDays - FreeDays - BilledStorageDays;
-
-                                    Error(
-                                      'Extra storage days to be billed: Please Contact Audit \' +
-                                      'Total Storage Days %1, Free Days %2, ' +
-                                      'Billed Storage Days %3, Remaining Days %4',
-                                      CurrentStorageDays,
-                                      FreeDays,
-                                      BilledStorageDays,
-                                      RemainingDays);
+                                      (CurrentStorageDays - FreeDays) - BilledStorageDays;
+                                    if RemainingDays > 0 then
+                                        Error(
+                                          'Extra storage days to be billed: Please Contact Audit \' +
+                                          'Total Storage Days %1, Free Days %2, ' +
+                                          'Billed Storage Days %3, Remaining Days %4',
+                                          CurrentStorageDays,
+                                          FreeDays,
+                                          BilledStorageDays,
+                                          RemainingDays);
                                 end;
                             end;
 
@@ -767,6 +767,7 @@ table 50150 "Gate Pass Out"
                 ManifestLine.SetRange("BL No.", SalesInvLine."BL No.");
                 ManifestLine.SetFilter("Parent Container ID", '<>%1', '');
                 ManifestLine.SetRange(Released, False);
+                ManifestLine.setrange("Container lock", False);
                 if ManifestLine.FindSet() then
                     repeat
                         TempSelectedContainers.init();
@@ -786,6 +787,8 @@ table 50150 "Gate Pass Out"
                         TempSelectedContainers."Line No." := ManifestLine."Line No.";
                         TempSelectedContainers."Date Received" := ManifestLine."Date Received";
                         TempSelectedContainers."Clearing Agent" := ManifestLine."Clearing Agent";
+                        TempSelectedContainers."Destination Type" := ManifestLine."Destination Type";
+                        TempSelectedContainers."Container Type" := ManifestLine."Container Type";
                         TempSelectedContainers.Insert();
                     until ManifestLine.Next() = 0;
                 clear(ManifestLookup);
