@@ -22,7 +22,7 @@ table 50107 "Manifest Line"
             Caption = 'Charge ID';
             Editable = false;
             FieldClass = FlowField;
-            CalcFormula = Lookup("Sales Invoice Line"."Charge ID" WHERE("Shortcut Dimension 1 Code" = FIELD("Global Dimension 1 Code")));
+            CalcFormula = Lookup("Sales Invoice Line"."Charge ID" WHERE("Shortcut Dimension 1 Code" = FIELD("Global Dimension 1 Code"), "Charge ID" = FILTER(<> '')));
         }
         field(4; Manifested; Boolean)
         {

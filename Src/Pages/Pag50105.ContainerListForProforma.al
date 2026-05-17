@@ -113,6 +113,7 @@ page 50105 ContainerListForProforma
         IMSSetup: Record "IMS Setup";
         StorageChargeID, RemarshallingChargeID, ChargeID : Code[20];
         RecItem: Record Item;
+        InvoicedNo: code[100];
         // ManifestHead: Record "Manifest Header";
         TestManifestLine, ManifestLine : Record "Manifest Line";
         ReceivingLog: Record ReceivingLog;
@@ -143,6 +144,8 @@ page 50105 ContainerListForProforma
         lrec_TmpSalesLine2, lrec_TmpSalesLine : record "Sales line" temporary;
         lrec_SalesInvLine: Record "Sales Invoice Line";
         lrec_SalesCrMemoLine: record "Sales Cr.Memo Line";
+        lrec_SalesCrMemoHeader: record "Sales Cr.Memo Header";
+        lrec_SalesInvHeader: Record "Sales Invoice Header";
         LNo, l_LineNo : Integer;
         RemarshallingExist, AlreadyInvoiced : Boolean;
         PostedSalesCrLine: Record "Sales Cr.Memo Line";
@@ -153,6 +156,7 @@ page 50105 ContainerListForProforma
         IF CloseAction IN [ACTION::OK, ACTION::LookupOK] THEN BEGIN
             lrec_TmpSalesLine.reset;
             lrec_TmpSalesLine.DeleteAll();
+
 
             CurrPage.SETSELECTIONFILTER(ManifestLine);
             if ManifestLine.FINDSET then
@@ -232,92 +236,120 @@ page 50105 ContainerListForProforma
                         ChargeID := GetChargeID(TempManifestLine, CustNo);
                         IMSSetup.Get();
                         //GK
-                        lrec_SalesInvLine.Reset();
-                        lrec_SalesInvLine.SetRange("Shortcut Dimension 1 Code", TempManifestLine."Global Dimension 1 Code");
-                        lrec_SalesInvLine.SetRange(Type, lrec_SalesInvLine.Type::Item);
-                        lrec_SalesInvLine.SetFilter(Quantity, '<>%1', 0);
-                        //lrec_SalesInvLine.SetFilter(Amount, '<>%1', 0);
-                        if lrec_SalesInvLine.FindSet() then
+                        //added header
+                        lrec_SalesInvHeader.Reset();
+                        lrec_SalesInvHeader.SetRange("Sell-to Customer No.", TempManifestLine."Consignee No.");
+                        lrec_SalesInvHeader.SetRange("BL No.", TempManifestLine."BL No.");
+                        lrec_SalesInvHeader.SetCurrentKey("No.");
+                        lrec_SalesInvHeader.Ascending(true);
+                        if lrec_SalesInvHeader.Findset() then begin
                             repeat
+                                InvoicedNo := '';
+                                InvoicedNo := lrec_SalesInvHeader."No.";
+                                lrec_SalesInvLine.Reset();
+                                lrec_SalesInvLine.SetRange("Shortcut Dimension 1 Code", TempManifestLine."Global Dimension 1 Code");
+                                lrec_SalesInvLine.SetRange("Sell-to Customer No.", TempManifestLine."Consignee No.");
+                                lrec_SalesInvLine.SetRange("Document No.", lrec_SalesInvHeader."No.");
+                                lrec_SalesInvLine.SetRange(Type, lrec_SalesInvLine.Type::Item);
+                                lrec_SalesInvLine.SetFilter(Quantity, '<>%1', 0);
+                                //lrec_SalesInvLine.SetFilter(Amount, '<>%1', 0);
 
-                                AlreadyInvoiced := true;
-                                lrec_TmpSalesLine.Reset();
-                                lrec_TmpSalesLine.SetRange("No.", lrec_SalesInvLine."No.");
-                                lrec_TmpSalesLine.SetRange("Shortcut Dimension 1 Code", lrec_SalesInvLine."Shortcut Dimension 1 Code");
-                                if lrec_TmpSalesLine.FindSet() then begin
+                                if lrec_SalesInvLine.Findset() then
+                                    repeat
 
-                                    lrec_TmpSalesLine.Quantity += lrec_SalesInvLine.Quantity;
-                                    lrec_TmpSalesLine.Amount += lrec_SalesInvLine.Amount;
-                                    lrec_TmpSalesLine."Chargable Storage Days" += lrec_SalesInvLine."Chargable Storage Days";
-                                    lrec_TmpSalesLine."Outstanding Quantity" += lrec_SalesInvLine.Quantity;
-                                    lrec_TmpSalesLine."Outstanding Amount" += lrec_SalesInvLine.Amount;
-                                    lrec_TmpSalesLine."Line Amount" += lrec_SalesInvLine."Line Amount";
-                                    lrec_TmpSalesLine."Line Discount Amount" += lrec_SalesInvLine."Line Discount Amount";
-                                    lrec_TmpSalesLine."Item Category Code" := lrec_SalesInvLine."Item Category Code";
-                                    lrec_TmpSalesLine."Reefer Hours" += lrec_SalesInvLine."Reefer Hours"; //CR
-                                    lrec_TmpSalesLine."Shortcut Dimension 1 Code" := lrec_SalesInvLine."Shortcut Dimension 1 Code";
-                                    lrec_TmpSalesLine."Shortcut Dimension 2 Code" := lrec_SalesInvLine."Shortcut Dimension 2 Code";
-                                    lrec_TmpSalesLine."Shortcut Dimension 3 Code" := lrec_SalesInvLine."Shortcut Dimension 3 Code";
-                                    lrec_TmpSalesLine."Shortcut Dimension 4 Code" := lrec_SalesInvLine."Shortcut Dimension 4 Code";
-                                    lrec_TmpSalesLine."Shortcut Dimension 5 Code" := lrec_SalesInvLine."Shortcut Dimension 5 Code";
-                                    lrec_TmpSalesLine."Shortcut Dimension 6 Code" := lrec_SalesInvLine."Shortcut Dimension 6 Code";
-                                    lrec_TmpSalesLine."Clearing Agent" := lrec_SalesInvLine."Clearing Agent";
-                                    lrec_TmpSalesLine."Clearing Agent Name" := lrec_SalesInvLine."Clearing Agent Name";
-                                    lrec_TmpSalesLine."Container No./Chassis No." := lrec_SalesInvLine."Container No./Chassis No.";
-                                    lrec_TmpSalesLine."Container Type" := lrec_SalesInvLine."Container Type";
-                                    lrec_TmpSalesLine."Job File No." := lrec_SalesInvLine."Job File No.";
-                                    lrec_TmpSalesLine.Modify();
-                                end else begin
-                                    l_LineNo += 10000;
-                                    lrec_TmpSalesLine.init;
-                                    lrec_TmpSalesLine."Document Type" := lrec_TmpSalesLine."Document Type"::Order;
-                                    lrec_TmpSalesLine."Line No." := l_LineNo;
-                                    lrec_TmpSalesLine."Document No." := SalesOrderNo;
-                                    lrec_TmpSalesLine.Type := lrec_TmpSalesLine.Type::Item;
-                                    lrec_TmpSalesLine."No." := lrec_SalesInvLine."No.";
-                                    lrec_TmpSalesLine.Quantity := lrec_SalesInvLine.Quantity;
-                                    lrec_TmpSalesLine."Chargable Storage Days" := lrec_SalesInvLine."Chargable Storage Days";
-                                    lrec_TmpSalesLine."Reefer Hours" := lrec_SalesInvLine."Reefer Hours"; //CR
-                                    lrec_TmpSalesLine."Unit Price" := lrec_SalesInvLine."Unit Price";
-                                    lrec_TmpSalesLine."Line Amount" := lrec_SalesInvLine."Line Amount";
-                                    lrec_TmpSalesLine."Line Discount Amount" := lrec_SalesInvLine."Line Discount Amount";
-                                    lrec_TmpSalesLine.Amount := lrec_SalesInvLine.Amount;
-                                    lrec_TmpSalesLine."Shortcut Dimension 1 Code" := lrec_SalesInvLine."Shortcut Dimension 1 Code";
-                                    lrec_TmpSalesLine."Shortcut Dimension 2 Code" := lrec_SalesInvLine."Shortcut Dimension 2 Code";
-                                    lrec_TmpSalesLine."Shortcut Dimension 3 Code" := lrec_SalesInvLine."Shortcut Dimension 3 Code";
-                                    lrec_TmpSalesLine."Shortcut Dimension 4 Code" := lrec_SalesInvLine."Shortcut Dimension 4 Code";
-                                    lrec_TmpSalesLine."Shortcut Dimension 5 Code" := lrec_SalesInvLine."Shortcut Dimension 5 Code";
-                                    lrec_TmpSalesLine."Shortcut Dimension 6 Code" := lrec_SalesInvLine."Shortcut Dimension 6 Code";
-                                    lrec_TmpSalesLine."Clearing Agent" := lrec_SalesInvLine."Clearing Agent";
-                                    lrec_TmpSalesLine."Clearing Agent Name" := lrec_SalesInvLine."Clearing Agent Name";
-                                    lrec_TmpSalesLine."Container No./Chassis No." := lrec_SalesInvLine."Container No./Chassis No.";
-                                    lrec_TmpSalesLine."Container Type" := lrec_SalesInvLine."Container Type";
-                                    lrec_TmpSalesLine."Job File No." := lrec_SalesInvLine."Job File No.";
-                                    lrec_TmpSalesLine."Outstanding Quantity" := lrec_SalesInvLine.Quantity;
-                                    lrec_TmpSalesLine."Outstanding Amount" := lrec_SalesInvLine.Amount;
-                                    lrec_TmpSalesLine."Item Category Code" := lrec_SalesInvLine."Item Category Code";
-                                    lrec_TmpSalesLine.Insert();
+                                        AlreadyInvoiced := true;
+                                        lrec_TmpSalesLine.Reset();
+                                        lrec_TmpSalesLine.SetRange("No.", lrec_SalesInvLine."No.");
+                                        lrec_TmpSalesLine.SetRange("Shortcut Dimension 1 Code", lrec_SalesInvLine."Shortcut Dimension 1 Code");
+                                        if lrec_TmpSalesLine.FindSet() then begin
+
+                                            lrec_TmpSalesLine.Quantity += lrec_SalesInvLine.Quantity;
+                                            lrec_TmpSalesLine.Amount += lrec_SalesInvLine.Amount;
+                                            lrec_TmpSalesLine."Chargable Storage Days" += lrec_SalesInvLine."Chargable Storage Days";
+                                            lrec_TmpSalesLine."Outstanding Quantity" += lrec_SalesInvLine.Quantity;
+                                            lrec_TmpSalesLine."Outstanding Amount" += lrec_SalesInvLine.Amount;
+                                            lrec_TmpSalesLine."Line Amount" += lrec_SalesInvLine."Line Amount";
+                                            lrec_TmpSalesLine."Line Discount Amount" += lrec_SalesInvLine."Line Discount Amount";
+                                            lrec_TmpSalesLine."Item Category Code" := lrec_SalesInvLine."Item Category Code";
+                                            lrec_TmpSalesLine."Reefer Hours" += lrec_SalesInvLine."Reefer Hours"; //CR
+                                            lrec_TmpSalesLine."Shortcut Dimension 1 Code" := lrec_SalesInvLine."Shortcut Dimension 1 Code";
+                                            lrec_TmpSalesLine."Shortcut Dimension 2 Code" := lrec_SalesInvLine."Shortcut Dimension 2 Code";
+                                            lrec_TmpSalesLine."Shortcut Dimension 3 Code" := lrec_SalesInvLine."Shortcut Dimension 3 Code";
+                                            lrec_TmpSalesLine."Shortcut Dimension 4 Code" := lrec_SalesInvLine."Shortcut Dimension 4 Code";
+                                            lrec_TmpSalesLine."Shortcut Dimension 5 Code" := lrec_SalesInvLine."Shortcut Dimension 5 Code";
+                                            lrec_TmpSalesLine."Shortcut Dimension 6 Code" := lrec_SalesInvLine."Shortcut Dimension 6 Code";
+                                            lrec_TmpSalesLine."Clearing Agent" := lrec_SalesInvLine."Clearing Agent";
+                                            lrec_TmpSalesLine."Clearing Agent Name" := lrec_SalesInvLine."Clearing Agent Name";
+                                            lrec_TmpSalesLine."Container No./Chassis No." := lrec_SalesInvLine."Container No./Chassis No.";
+                                            lrec_TmpSalesLine."Container Type" := lrec_SalesInvLine."Container Type";
+                                            lrec_TmpSalesLine."Job File No." := lrec_SalesInvLine."Job File No.";
+                                            lrec_TmpSalesLine.Modify();
+                                        end else begin
+
+
+                                            l_LineNo += 10000;
+                                            lrec_TmpSalesLine.init;
+                                            lrec_TmpSalesLine."Document Type" := lrec_TmpSalesLine."Document Type"::Order;
+                                            lrec_TmpSalesLine."Line No." := l_LineNo;
+                                            lrec_TmpSalesLine."Document No." := SalesOrderNo;
+                                            lrec_TmpSalesLine.Type := lrec_TmpSalesLine.Type::Item;
+                                            lrec_TmpSalesLine."No." := lrec_SalesInvLine."No.";
+                                            lrec_TmpSalesLine.Quantity := lrec_SalesInvLine.Quantity;
+                                            lrec_TmpSalesLine."Chargable Storage Days" := lrec_SalesInvLine."Chargable Storage Days";
+                                            lrec_TmpSalesLine."Reefer Hours" := lrec_SalesInvLine."Reefer Hours"; //CR
+                                            lrec_TmpSalesLine."Unit Price" := lrec_SalesInvLine."Unit Price";
+                                            lrec_TmpSalesLine."Line Amount" := lrec_SalesInvLine."Line Amount";
+                                            lrec_TmpSalesLine."Line Discount Amount" := lrec_SalesInvLine."Line Discount Amount";
+                                            lrec_TmpSalesLine.Amount := lrec_SalesInvLine.Amount;
+                                            lrec_TmpSalesLine."Shortcut Dimension 1 Code" := lrec_SalesInvLine."Shortcut Dimension 1 Code";
+                                            lrec_TmpSalesLine."Shortcut Dimension 2 Code" := lrec_SalesInvLine."Shortcut Dimension 2 Code";
+                                            lrec_TmpSalesLine."Shortcut Dimension 3 Code" := lrec_SalesInvLine."Shortcut Dimension 3 Code";
+                                            lrec_TmpSalesLine."Shortcut Dimension 4 Code" := lrec_SalesInvLine."Shortcut Dimension 4 Code";
+                                            lrec_TmpSalesLine."Shortcut Dimension 5 Code" := lrec_SalesInvLine."Shortcut Dimension 5 Code";
+                                            lrec_TmpSalesLine."Shortcut Dimension 6 Code" := lrec_SalesInvLine."Shortcut Dimension 6 Code";
+                                            lrec_TmpSalesLine."Clearing Agent" := lrec_SalesInvLine."Clearing Agent";
+                                            lrec_TmpSalesLine."Clearing Agent Name" := lrec_SalesInvLine."Clearing Agent Name";
+                                            lrec_TmpSalesLine."Container No./Chassis No." := lrec_SalesInvLine."Container No./Chassis No.";
+                                            lrec_TmpSalesLine."Container Type" := lrec_SalesInvLine."Container Type";
+                                            lrec_TmpSalesLine."Job File No." := lrec_SalesInvLine."Job File No.";
+                                            lrec_TmpSalesLine."Outstanding Quantity" := lrec_SalesInvLine.Quantity;
+                                            lrec_TmpSalesLine."Outstanding Amount" := lrec_SalesInvLine.Amount;
+                                            lrec_TmpSalesLine."Item Category Code" := lrec_SalesInvLine."Item Category Code";
+                                            lrec_TmpSalesLine.Insert();
+                                        end;
+                                    until lrec_SalesInvLine.Next() = 0;
+                                //added sales credit memo flow inside the sales header inv to accomodate invoice No...15/05/26
+                                lrec_SalesCrMemoHeader.reset();
+                                lrec_SalesCrMemoHeader.SetRange("Applies-to Doc. No.", InvoicedNo);
+                                lrec_SalesCrMemoHeader.SetRange("BL No.", TempManifestLine."BL No.");
+                                if lrec_SalesCrMemoHeader.FindSet() then begin
+                                    repeat
+                                        lrec_SalesCrMemoLine.Reset();
+                                        lrec_SalesCrMemoLine.SetRange("Shortcut Dimension 1 Code", TempManifestLine."Global Dimension 1 Code");
+                                        lrec_SalesCrMemoLine.SetRange("Document No.", lrec_SalesCrMemoHeader."No.");
+                                        lrec_SalesCrMemoLine.SetRange(Type, lrec_SalesCrMemoLine.Type::Item);
+                                        lrec_SalesCrMemoLine.SetFilter(Quantity, '<>%1', 0);
+                                        if lrec_SalesCrMemoLine.FindSet() then
+                                            repeat
+                                                lrec_TmpSalesLine.Reset();
+                                                lrec_TmpSalesLine.SetRange("No.", lrec_SalesCrMemoLine."No.");
+                                                lrec_TmpSalesLine.SetRange("Shortcut Dimension 1 Code", lrec_SalesCrMemoLine."Shortcut Dimension 1 Code");
+                                                if lrec_TmpSalesLine.FindSet() then begin
+                                                    lrec_TmpSalesLine.Quantity -= lrec_SalesCrMemoLine.Quantity;
+                                                    //InvoicedChargeAmount := lrec_TmpSalesLine.Amount;
+                                                    //ChargedStorageDays := lrec_TmpSalesLine."Chargable Storage Days";
+                                                    lrec_TmpSalesLine.Modify();
+                                                end;
+                                            until lrec_SalesCrMemoLine.Next() = 0;
+                                    until lrec_SalesCrMemoHeader.Next() = 0;
                                 end;
-                            until lrec_SalesInvLine.Next() = 0;
+                            //end of credit note check.
+                            until lrec_SalesInvHeader.Next() = 0;
+                        end;
 
                         //page.run(page::"Proforma SubForm", lrec_TmpSalesLine);
                         //exit;
-                        lrec_SalesCrMemoLine.Reset();
-                        lrec_SalesCrMemoLine.SetRange("Shortcut Dimension 1 Code", TempManifestLine."Global Dimension 1 Code");
-                        lrec_SalesCrMemoLine.SetRange(Type, lrec_SalesCrMemoLine.Type::Item);
-                        lrec_SalesCrMemoLine.SetFilter(Quantity, '<>%1', 0);
-                        if lrec_SalesCrMemoLine.FindSet() then
-                            repeat
-                                lrec_TmpSalesLine.Reset();
-                                lrec_TmpSalesLine.SetRange("No.", lrec_SalesCrMemoLine."No.");
-                                lrec_TmpSalesLine.SetRange("Shortcut Dimension 1 Code", lrec_SalesCrMemoLine."Shortcut Dimension 1 Code");
-                                if lrec_TmpSalesLine.FindSet() then begin
-                                    lrec_TmpSalesLine.Quantity -= lrec_SalesCrMemoLine.Quantity;
-                                    //InvoicedChargeAmount := lrec_TmpSalesLine.Amount;
-                                    //ChargedStorageDays := lrec_TmpSalesLine."Chargable Storage Days";
-                                    lrec_TmpSalesLine.Modify();
-                                end;
-                            until lrec_SalesCrMemoLine.Next() = 0;
+
                         IMSSetup.Get();
                         //page.run(page::"Proforma SubForm", lrec_TmpSalesLine);
                         // exit;
@@ -524,6 +556,7 @@ page 50105 ContainerListForProforma
                                 ChargeGroupLine2.SetRange("Active/In-Active", ChargeGroupLine2."Active/In-Active"::Active);
                                 IF ChargeGroupLine2.FindFirst() then begin
                                     repeat
+
                                         ChargeGroupLine.Reset();
                                         ChargeGroupLine.SetRange("Charge ID Group Code", ChargeGroupLine2."Charge ID Group Code");
                                         ChargeGroupLine.SetRange("Line No.", ChargeGroupLine2."Line No.");
@@ -532,6 +565,8 @@ page 50105 ContainerListForProforma
                                         if RemarshallingExist then
                                             ChargeGroupLine.SetRange("Rely On Storage", true);
                                         if ChargeGroupLine.FindFirst() then begin
+                                            // Message(ChargeGroupLine."Charge Description ");
+
                                             if StorageDays > ChargeGroupLine2."Free Days" then begin
                                                 Salesline.Reset();
                                                 Salesline.SetRange("Document Type", Salesline."Document Type"::Order);
@@ -556,7 +591,7 @@ page 50105 ContainerListForProforma
                                                     // if StorageDays < ChargeGroupLine."Free Days" then
                                                     //     ChargeGroupLine.SetRange("Calculate if Storage Days", false);
                                                     // if ChargeGroupLine.FindFirst() then;
-
+                                                    message(ChargeGroupLine."Charge Description ");
                                                     Salesline.Init;
                                                     Salesline.validate("Document Type", Salesline."Document Type"::Order);
                                                     Salesline.VAlidate("Document No.", SalesOrderNo);

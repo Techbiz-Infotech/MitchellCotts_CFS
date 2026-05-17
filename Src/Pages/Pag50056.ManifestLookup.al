@@ -733,8 +733,11 @@ page 50056 "Manifest lookup"
     trigger OnQueryClosePage(CloseAction: Action): Boolean
     var
         TempCLE: Record "Manifest Line" temporary;
+        NetProfit: decimal;
+
     begin
         if CloseAction in [action::OK, action::LookupOK] then begin
+
             if Rec.FINDSET then
                 repeat
                     TempCLE := Rec;
@@ -759,12 +762,19 @@ page 50056 "Manifest lookup"
 
             If TempCLE.FindSet() then
                 repeat
-                    if GPHead.get(GPNo) then
+                    NetProfit := 0;
+
+                    if GPHead.get(GPNo) then begin
+                        //add credit check gross margin 12/05/26
+                        NetProfit := GPHead.CalculateContainerProfit(TempCLE."Global Dimension 1 Code");
+                        if NetProfit < 0 then Error('The Credit Gross margin is below 0 for container:%1', TempCLE."Global Dimension 1 Code");
+                        //end credit check gross margin
                         if GPHead.Approved THEN
-                            GPHead.InsertEmptyContainerGatePassLine(TempCLE)
+                            GPHead.InsertEmptyContainerGatePassLine(TempCLE, GPHead.Approved)
                         else
                             if (TempCLE."Parent Container ID" <> '') and (GPHead.Approved = FALSE) then
                                 InsertStrippedGatePassLines(TempCLE);
+                    end;
                 until TempCLE.Next = 0;
 
 

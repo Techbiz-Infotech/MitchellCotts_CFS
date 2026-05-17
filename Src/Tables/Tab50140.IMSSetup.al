@@ -265,6 +265,11 @@ table 50140 "IMS Setup"
             TableRelation = "Item Category";
             DataClassification = ToBeClassified;
         }
+        field(46; "Journal Template Name"; Code[10])
+        {
+            Caption = 'Receiving Journal Template Name';
+            TableRelation = "Gen. Journal Template";
+        }
 
 
     }

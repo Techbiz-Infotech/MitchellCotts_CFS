@@ -203,6 +203,10 @@ page 50139 "IMS Setup"
                     ApplicationArea = all;
                     ToolTip = 'Specifies the name of KPA Receive Manditory';
                 }
+                field("Journal Template Name"; Rec."Journal Template Name")
+                {
+                    ApplicationArea = all;
+                }
 
             }
         }

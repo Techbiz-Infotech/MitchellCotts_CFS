@@ -1125,7 +1125,7 @@ page 50161 "Proforma SubForm"
     var
         TrackingForm: Page "Order Tracking";
     begin
-        TrackingForm.SetSalesLine(Rec);
+        //TrackingForm.SetVariantRec(Rec);
         TrackingForm.RunModal();
     end;
 

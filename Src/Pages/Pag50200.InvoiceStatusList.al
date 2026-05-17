@@ -169,6 +169,7 @@ page 50200 InvoiceStatusList
 
         StorageStartDate: Date;
         PrevDocNo, PrevContainerNo : Code[20];
+        NetProfit: decimal;
     begin
         GPHead.Reset();
         GPHead.SetRange("Gate Pass No.", GPNo);
@@ -176,6 +177,7 @@ page 50200 InvoiceStatusList
             LineNo := 0;
             InvoiceCount := 0;
             ClosedCont := 0;
+            NetProfit := 0;
             GPLine.Reset();
             GPLine.SetRange("Gate Pass No.", GPHead."Gate Pass No.");
             IF GPLine.FindSet() then begin
@@ -263,7 +265,9 @@ page 50200 InvoiceStatusList
                                         end;
                                         GSalesInvLine.Reset();
                                         GSalesInvLine.SetRange("Shortcut Dimension 1 Code", PrevContainerNo);
+                                        GSalesInvLine.SetFilter("Charge ID", '<>%1', '');
                                         if GSalesInvLine.FindFirst() then begin
+
                                             if ChargeGroupHead.Get(GSalesInvLine."Charge ID") then begin
                                                 BaseOn := ChargeGroupHead."Base On";
                                                 ChargeGroupLine.Reset();
@@ -318,6 +322,10 @@ page 50200 InvoiceStatusList
                                 //for additional storage
                                 CheckAdditionalCharges(SalesInvLine."Shortcut Dimension 1 Code");
                                 //for additional storage
+                                //add credit check gross margin 12/05/26
+                                NetProfit := GPHead.CalculateContainerProfit(SalesInvLine."Shortcut Dimension 1 Code");
+                                if NetProfit < 0 then Error('The Credit Gross margin is below 0 for container:%1', SalesInvLine."Shortcut Dimension 1 Code");
+                                //end credit check gross margin
                                 GatePassLine.Reset();
                                 GatePassLine.SetRange(GatePassLine."Gate Pass No.", GPHead."Gate Pass No.");
                                 IF GatePassLine.FindLast() then

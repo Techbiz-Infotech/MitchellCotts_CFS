@@ -114,13 +114,13 @@ table 50126 "Containers Cue"
         {
             Caption = 'Received Containers Today';
             FieldClass = FlowField;
-            CalcFormula = count("Manifest Line" where(Received = filter(true), "Date Received" = Field("Current Date Filter"), "Shortcut Dimension 4 Code" = filter('CONTAINER'), "Shortcut Dimension 6 Code" = filter('EMPTY')));
+            CalcFormula = count("Manifest Line" where(Received = filter(true), "Date Received" = Field("Current Date Filter"), "Shortcut Dimension 6 Code" = filter('EMPTY')));
         }
         field(20; "EMPTYCTR Reld Containers Today"; Integer)
         {
             Caption = 'Released Containers Today';
             FieldClass = FlowField;
-            CalcFormula = count("Manifest Line" where(Released = filter(true), "Date Released" = Field("Current Date Filter"), "Shortcut Dimension 4 Code" = filter('CONTAINER'), "Shortcut Dimension 6 Code" = filter('EMPTY')));
+            CalcFormula = count("Manifest Line" where(Released = filter(true), "Date Released" = Field("Current Date Filter"), "Shortcut Dimension 6 Code" = filter('EMPTY')));
         }
         field(21; "EMPTYCTR Stock 40FT"; Integer)
         {

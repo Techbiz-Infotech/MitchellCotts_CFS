@@ -243,18 +243,68 @@ table 50110 "Receiving Journal"
             DataClassification = ToBeClassified;
             TableRelation = Position." Position ID" where(Status = const(Open));
         }
+        field(47; "Journal Template Name"; Code[10])
+        {
+            Caption = 'Journal Template Name';
+            TableRelation = "Gen. Journal Template";
+        }
+        field(48; "Journal Batch Name"; Code[10])
+        {
+            Caption = 'Journal Batch Name';
+            TableRelation = "Gen. Journal Batch".Name where("Journal Template Name" = field("Journal Template Name"));
+
+            trigger OnValidate()
+            begin
+
+                UpdateJournalBatchID();
+            end;
+        }
+        field(8006; "Journal Batch Id"; Guid)
+        {
+            Caption = 'Journal Batch Id';
+            TableRelation = "Gen. Journal Batch".SystemId;
+
+            trigger OnValidate()
+            begin
+                UpdateJournalBatchName();
+            end;
+        }
     }
     keys
     {
-        key(PK; "User ID", "Line No.")
+        key(PK; "Journal Template Name", "Journal Batch Name", "Line No.")
         {
             Clustered = true;
         }
     }
     trigger OnInsert()
+    var
+        Imssetup: record "IMS Setup";
     begin
+        Imssetup.get;
+        "Journal Template Name" := Imssetup."Journal Template Name";
         "User ID" := USERID;
 
+    end;
+
+    procedure UpdateJournalBatchID()
+    var
+        GenJournalBatch: Record "Gen. Journal Batch";
+    begin
+        if not GenJournalBatch.Get(Rec."Journal Template Name", Rec."Journal Batch Name") then
+            exit;
+        "Journal Batch Id" := GenJournalBatch.SystemId;
+
+    end;
+
+    local procedure UpdateJournalBatchName()
+    var
+        GenJournalBatch: Record "Gen. Journal Batch";
+    begin
+        if not GenJournalBatch.GetBySystemId("Journal Batch Id") then
+            exit;
+
+        "Journal Batch Name" := GenJournalBatch.Name;
     end;
 
 }

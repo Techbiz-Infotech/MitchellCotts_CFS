@@ -412,7 +412,7 @@ page 50167 ClosedProformaCard
         }
         area(factboxes)
         {
-            part("Attached Documents"; "Document Attachment Factbox")
+            part("Attached Documents"; "Doc. Attachment List Factbox")
             {
                 ApplicationArea = All;
                 Caption = 'Attachments';
@@ -518,10 +518,9 @@ page 50167 ClosedProformaCard
                 trigger OnAction()
                 var
                 begin
-                    if (UserId <> 'GROUP.AUDIT') or (UserId <> 'TECHBIZINFOTECH') then
-                        error('Do not have permission')
-                    else
-                        ReOpenClosed();
+
+
+                    ReOpenClosed();
                 end;
             }
         }

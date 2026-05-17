@@ -145,19 +145,7 @@ page 50104 "proforma Invoice"
                         QuickEntry = false;
                         ToolTip = 'Specifies the postal code.';
                     }
-                    field("Sell-to Country/Region Code"; Rec."Sell-to Country/Region Code")
-                    {
-                        ApplicationArea = Basic, Suite;
-                        Caption = 'Country/Region Code';
-                        Importance = Additional;
-                        QuickEntry = false;
-                        ToolTip = 'Specifies the country or region of the address.';
 
-                        trigger OnValidate()
-                        begin
-                            IsSellToCountyVisible := FormatAddress.UseCounty(Rec."Sell-to Country/Region Code");
-                        end;
-                    }
                     field("Sell-to Contact No."; Rec."Sell-to Contact No.")
                     {
                         ApplicationArea = Basic, Suite;
@@ -434,7 +422,7 @@ page 50104 "proforma Invoice"
         }
         area(factboxes)
         {
-            part("Attached Documents"; "Document Attachment Factbox")
+            part("Attached Documents"; "Doc. Attachment List Factbox")
             {
                 ApplicationArea = All;
                 Caption = 'Attachments';
@@ -1249,7 +1237,7 @@ page 50104 "proforma Invoice"
 
         Rec.SetRange("Date Filter", 0D, WorkDate());
 
-        ActivateFields();
+
 
         SetDocNoVisible();
 
@@ -1287,10 +1275,10 @@ page 50104 "proforma Invoice"
         SalesCalcDiscountByType: Codeunit "Sales - Calc Discount By Type";
         UserMgt: Codeunit "User Setup Management";
         CustomerMgt: Codeunit "Customer Mgt.";
-        FormatAddress: Codeunit "Format Address";
+
         ChangeExchangeRate: Page "Change Exchange Rate";
         Usage: Option "Order Confirmation","Work Order","Pick Instruction";
-        [InDataSet]
+
         JobQueueVisible: Boolean;
         Text001: Label 'Do you want to change %1 in all related records in the warehouse?';
         Text002: Label 'The update has been interrupted to respect the warning.';
@@ -1329,12 +1317,7 @@ page 50104 "proforma Invoice"
         ShipToOptions: Enum "Sales Ship-to Options";
         BillToOptions: Enum "Sales Bill-to Options";
 
-    local procedure ActivateFields()
-    begin
-        IsBillToCountyVisible := FormatAddress.UseCounty(Rec."Bill-to Country/Region Code");
-        IsSellToCountyVisible := FormatAddress.UseCounty(Rec."Sell-to Country/Region Code");
-        IsShipToCountyVisible := FormatAddress.UseCounty(Rec."Ship-to Country/Region Code");
-    end;
+
 
     [Obsolete('Replaced by PostSalesOrder().', '18.0')]
     procedure PostDocument(PostingCodeunitID: Integer; Navigate: Option)

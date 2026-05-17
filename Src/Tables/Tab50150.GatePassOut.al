@@ -440,9 +440,9 @@ table 50150 "Gate Pass Out"
                     repeat
                         if EmptyContainerManifest."Shortcut Dimension 6 Code" = 'EMPTY' Then begin
                             if EmptyContainerManifest.Selected then
-                                InsertEmptyContainerGatePassLine(EmptyContainerManifest);
+                                InsertEmptyContainerGatePassLine(EmptyContainerManifest, False);
                         end else
-                            InsertEmptyContainerGatePassLine(EmptyContainerManifest);
+                            InsertEmptyContainerGatePassLine(EmptyContainerManifest, False);
                     until EmptyContainerManifest.Next() = 0;
 
 
@@ -452,7 +452,7 @@ table 50150 "Gate Pass Out"
             exit;
     End;
 
-    Procedure InsertEmptyContainerGatePassLine(Var TempManifest: record "Manifest Line" temporary)
+    Procedure InsertEmptyContainerGatePassLine(Var TempManifest: record "Manifest Line" temporary; strippedapproved: boolean)
     var
         GatePassLine: record "Gate Pass Out Line";
         GPHead: record "Gate Pass Out";
@@ -537,7 +537,7 @@ table 50150 "Gate Pass Out"
                         PaymentMethod := SalesInvHead."Payment Method Code";
                         PaymentTerms := SalesInvHead."Payment Terms Code";
                         SalesInvHead.CalcFields(Closed);
-                        if not GPHead.Approved then begin
+                        if not strippedapproved then begin
                             if SalesInvHead.Closed <> true then
                                 Error('Invoice %1 is not paid. Please check and try again', SalesInvHead."No.");
                         end;
@@ -1070,6 +1070,43 @@ table 50150 "Gate Pass Out"
                     Error('Additional charges not billed for the Container ID %1. Please check and try again', AddCharge."Container ID");
             until AddCharge.Next() = 0;
         end;
+    end;
+
+    procedure CalculateContainerProfit(ContainerNo: Code[20]): Decimal
+    var
+        GLEntry: Record "G/L Entry";
+        AccountTypeSetup: Record "Credit Gross Margin";
+        RevenueTotal: Decimal;
+        ExpenseTotal: Decimal;
+        NetProfit: Decimal;
+    begin
+        RevenueTotal := 0;
+        ExpenseTotal := 0;
+
+        // Filter G/L Entries by container
+        GLEntry.Reset();
+        GLEntry.SetRange("Global Dimension 1 Code", ContainerNo);
+
+        if GLEntry.FindSet() then
+            repeat
+                // Check if account is in setup table
+                AccountTypeSetup.Reset();
+                AccountTypeSetup.SetRange("G/L Account", GLEntry."G/L Account No.");
+
+                if AccountTypeSetup.FindFirst() then begin
+                    case AccountTypeSetup.Type of
+                        AccountTypeSetup.Type::"Storage Account":
+                            RevenueTotal += GLEntry.Amount;
+
+                        AccountTypeSetup.Type::"Var Cost Account":
+                            ExpenseTotal += GLEntry.Amount;
+                    end;
+                end;
+            until GLEntry.Next() = 0;
+
+        NetProfit := RevenueTotal - ExpenseTotal;
+
+        exit(NetProfit);
     end;
 
     procedure GetReceiptNo()

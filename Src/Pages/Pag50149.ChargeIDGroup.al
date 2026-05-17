@@ -74,7 +74,7 @@ page 50149 "Charge ID Group"
                     ApplicationArea = All;
                     ToolTip = 'Specifies the value of the Total Standard Charges amount field.';
                 }
-                field("Free Days";Rec."Free Days")
+                field("Free Days"; Rec."Free Days")
                 {
                     ApplicationArea = All;
                     ToolTip = 'Specifies the value of the Free Days field.';
@@ -91,7 +91,7 @@ page 50149 "Charge ID Group"
         }
         area(factboxes)
         {
-            part("Attached Documents"; "Document Attachment Factbox")
+            part("Attached Documents"; "Doc. Attachment List Factbox")
             {
                 ApplicationArea = All;
                 Caption = 'Attachments';

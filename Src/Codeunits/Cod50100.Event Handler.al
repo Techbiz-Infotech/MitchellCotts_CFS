@@ -425,8 +425,9 @@ codeunit 50100 Events
         VJsonArray1.Add(VJsonArrayAgent);
         VJsonArray1.WriteTo(ReturnValue);
     end;
+    
 
-    [EventSubscriber(ObjectType::Page, Page::"Document Attachment Factbox", 'OnBeforeDrillDown', '', false, false)]
+    [EventSubscriber(ObjectType::Page, Page::"Doc. Attachment List Factbox", 'OnAfterGetRecRefFail', '', false, false)]
     local procedure OnBeforeDrillDown(DocumentAttachment: Record "Document Attachment"; var RecRef: RecordRef);
     var
         ChargGroup: Record "Charge ID Group Header";

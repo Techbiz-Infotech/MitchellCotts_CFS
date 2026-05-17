@@ -6,7 +6,7 @@
             "request": "launch",
             "type": "al",
             "environmentType": "Sandbox",
-            "environmentName": "Test4",
+            "environmentName": "Test5",
             "startupObjectId": 50153,
             "startupObjectType": "Page",
             "breakOnError": true,

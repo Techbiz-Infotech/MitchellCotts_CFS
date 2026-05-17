@@ -37,6 +37,16 @@ page 50147 "Receiving Journal"
                         end;
                     end;
                 }
+
+                field("Journal Batch Name"; Rec."Journal Batch Name")
+                {
+                    trigger OnValidate()
+                    begin
+                        if ContainerNo = '' then Error('Insert Container ID first');
+                    end;
+
+                }
+
             }
             repeater(General)
             {
@@ -260,8 +270,10 @@ page 50147 "Receiving Journal"
                         ReceivingLog.SetRange("Global Dimension 1 Code", Rec."Global Dimension 1 Code");
                         IF ReceivingLog.FindFirst() then
                             report.RunModal(report::"Receiving Log", true, true, ReceivingLog);
-                        Rec.SetRange("User ID", USERID);
-                        rec.DeleteAll();
+                        receRec1.SetRange("Journal Batch Name", rec."Journal Batch Name");
+                        receRec1.SetRange("Journal Template Name", rec."Journal Template Name");
+                        if receRec1.FindSet() then
+                            receRec1.DeleteAll();
                     end else
                         exit;
 
@@ -273,17 +285,20 @@ page 50147 "Receiving Journal"
     var
         ContainerNo: code[20];
         ReceivingLog: Record ReceivingLog;
+        receRec1: Record "Receiving Journal";
     //ManiHead: Record "Manifest Header";
 
     procedure GetManifestLineInfo()
     var
-        receRec1: Record "Receiving Journal";
+
         ManifestLineRec: Record "Manifest Line";
 
         LineNo: Integer;
     begin
-        Rec.SetRange("User ID", USERID);
-        rec.DeleteAll();
+        receRec1.SetRange("Journal Batch Name", rec."Journal Batch Name");
+        receRec1.SetRange("Journal Template Name", rec."Journal Template Name");
+        if receRec1.FindSet() then
+            receRec1.DeleteAll();
         ManifestLineRec.Reset();
         ManifestLineRec.SetRange(ManifestLineRec."Global Dimension 1 Code", ContainerNo);
         ManifestLineRec.SetRange("Container lock", false);
@@ -320,7 +335,8 @@ page 50147 "Receiving Journal"
         ManifestLineRec: Record "Manifest Line";
     begin
         ReceiveRec.Reset;
-        ReceiveRec.SetRange("User ID", USERID);
+        ReceiveRec.SetRange("Journal Batch Name", rec."Journal Batch Name");
+        ReceiveRec.SetRange("Journal Template Name", rec."Journal Template Name");
         ReceiveRec.SetRange(Recieived, true);
         IF ReceiveRec.findfirst then
             repeat
@@ -375,7 +391,8 @@ page 50147 "Receiving Journal"
             EntryNo := 1;
         ReceiveJourRec := Rec;
         ReceiveJourRec.Reset();
-        ReceiveJourRec.SetRange("User ID", USERID);
+        ReceiveJourRec.SetRange("Journal Batch Name", rec."Journal Batch Name");
+        ReceiveJourRec.SetRange("Journal Template Name", rec."Journal Template Name");
         ReceiveJourRec.SetRange(Recieived, true);
         IF ReceiveJourRec.Findfirst then
             repeat
@@ -471,11 +488,22 @@ page 50147 "Receiving Journal"
 
     end;
 
+    trigger OnNewRecord(BelowxRec: Boolean)
+    var
+        imssetup: record "IMS Setup";
+    begin
+        imssetup.Get();
+        rec."Journal Template Name" := imssetup."Journal Template Name";
+    end;
+
+
     trigger OnOpenPage()
     var
         myInt: Integer;
+
     begin
         Rec.SetRange("User ID", USERID);
+
     end;
 }
 
