@@ -207,7 +207,7 @@ page 50160 "Charge ID Assignment"
 
                     trigger OnAction()
                     begin
-                        if (UserId <> 'GROUP.AUDIT') and (UserId <> 'TECHBIZINFOTECH') then begin
+                        if (UserId <> 'GROUP.AUDIT') and (UserId <> 'TECHBIZINFOTECH') and (UserId <> 'SHILLAH') then begin
                             Error('You are not Authorised. Please Contact Group Audit');
                         end else begin
                             Rec."Assignment Status" := Rec."Assignment Status"::Released;

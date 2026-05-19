@@ -61,10 +61,10 @@ report 50055 "Credit Gross Margin"
                             repeat
                                 case CreditGrossMarginRec.Type of
                                     CreditGrossMarginRec.Type::"Storage Account":
-                                        RevenueTotal += GLEntry.Amount;
+                                        RevenueTotal += ABS(GLEntry.Amount);
 
                                     CreditGrossMarginRec.Type::"Var Cost Account":
-                                        ExpenseTotal += GLEntry.Amount;
+                                        ExpenseTotal += ABS(GLEntry.Amount);
                                 end;
                             until GLEntry.Next() = 0;
 

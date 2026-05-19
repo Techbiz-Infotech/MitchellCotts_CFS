@@ -1287,7 +1287,8 @@ page 50105 ContainerListForProforma
                                 TempPurchInvLine.SetRange("No.", PurchCrLine."No.");
                                 TempPurchInvLine.SetRange("Shortcut Dimension 1 Code", PurchCrLine."Shortcut Dimension 1 Code");
                                 if TempPurchInvLine.FindSet() then begin
-                                    TempPurchInvLine.Quantity -= PurchCrLine.Quantity;
+                                    if TempPurchInvLine.amount = PurchCrLine.Amount then
+                                        TempPurchInvLine.Quantity -= PurchCrLine.Quantity;
                                     TempPurchInvLine."Unit Cost" -= PurchCrLine."Unit Cost";
                                     TempPurchInvLine.Modify();
                                 end;
