@@ -4384,6 +4384,9 @@ End Function
         <Field Name="Shortcut_Dimension_1_Code">
           <DataField>Shortcut_Dimension_1_Code</DataField>
         </Field>
+        <Field Name="Shortcut_DimensionCode">
+          <DataField>Shortcut_DimensionCode</DataField>
+        </Field>
         <Field Name="Storage_Start_Date">
           <DataField>Storage_Start_Date</DataField>
         </Field>

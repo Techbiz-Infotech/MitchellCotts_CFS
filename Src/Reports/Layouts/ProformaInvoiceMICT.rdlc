@@ -3991,6 +3991,9 @@ End Function
         <Field Name="ShortcutDimension1Code">
           <DataField>ShortcutDimension1Code</DataField>
         </Field>
+        <Field Name="ShortcutDimensionCode">
+          <DataField>ShortcutDimensionCode</DataField>
+        </Field>
         <Field Name="BLNo">
           <DataField>BLNo</DataField>
         </Field>

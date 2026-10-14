@@ -1,0 +1,7 @@
+enum 55031 "Sales Order DocType"
+{
+    Extensible = true;
+    //AssignmentCompatibility = true;
+
+    value(0; "Order") { Caption = 'Order'; }
+}

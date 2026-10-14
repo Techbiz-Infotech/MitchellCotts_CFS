@@ -1,4 +1,4 @@
-xmlport 50100 "Manifest Line Import"
+xmlport 55000 "Manifest Line Import"
 {
     Caption = 'Manifest Line Import';
     Direction = Import;

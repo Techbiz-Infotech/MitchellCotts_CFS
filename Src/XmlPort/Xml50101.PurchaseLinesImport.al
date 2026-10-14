@@ -1,4 +1,4 @@
-xmlport 50101 PurchaseLinesImport
+xmlport 55001 PurchaseLinesImport
 {
     Caption = 'PurchaseLinesImport';
     Direction = Import;
@@ -19,7 +19,7 @@ xmlport 50101 PurchaseLinesImport
                 fieldelement(DirectUnitCost; PurchaseLine."Direct Unit Cost")
                 {
                 }
-                fieldelement(ShortcutDimension1Code; PurchaseLine."Shortcut Dimension 1 Code")
+                fieldelement(ShortcutDimension1Code; PurchaseLine."Shortcut Dimension 4 Code")
                 {
                 }
 
@@ -48,7 +48,7 @@ xmlport 50101 PurchaseLinesImport
                     myInt: Integer;
                 begin
                     Manifestline.reset;
-                    ManifestLine.setrange("Global Dimension 1 Code", PurchaseLine."Shortcut Dimension 1 Code");
+                    ManifestLine.setrange("Shortcut Dimension 4 Code", PurchaseLine."Shortcut Dimension 4 Code");
                     if ManifestLine.FindFirst() then begin
                         PurchaseLine.validate("Shortcut Dimension 2 Code", ManifestLine."Global Dimension 2 Code");
                     end;
