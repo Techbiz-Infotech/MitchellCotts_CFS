@@ -188,6 +188,7 @@ codeunit 55000 Events
     local procedure SetDim4OnPurchInvLine(var PurchInvLine: Record "Purch. Inv. Line"; PurchaseLine: Record "Purchase Line")
     begin
         PurchInvLine."Shortcut Dimension 4 Code" := PurchaseLine."Shortcut Dimension 4 Code";
+        PurchInvLine."BL No" := PurchaseLine."BL No";
     end;
 
 

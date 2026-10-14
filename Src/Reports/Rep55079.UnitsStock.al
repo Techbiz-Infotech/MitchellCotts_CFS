@@ -154,13 +154,24 @@ report 55079 "Units Stock"
 
     end;
 
-    Local procedure CreateExcelBook();
+
+    local procedure CreateExcelBook()
+    var
+        TempBlob: Codeunit "Temp Blob";
+        OutStr: OutStream;
+        InStr: InStream;
+        FileName: Text;
     begin
         TempExcelBuffer.CreateNewBook('Units Stock Status');
         TempExcelBuffer.WriteSheet('Units Stock Status', CompanyName, UserId);
         TempExcelBuffer.CloseBook();
-        TempExcelBuffer.SetFriendlyFilename('Units Stock Status');
-        TempExcelBuffer.OpenExcel();
+
+        TempBlob.CreateOutStream(OutStr);
+        TempExcelBuffer.SaveToStream(OutStr, true);
+        TempBlob.CreateInStream(InStr);
+
+        FileName := 'Units Stock Status Report.xlsx';
+        DownloadFromStream(InStr, '', '', '', FileName);
     end;
 
     var

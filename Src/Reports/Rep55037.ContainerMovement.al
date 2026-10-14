@@ -10,7 +10,7 @@ report 55037 "Container Movement"
     {
         dataitem(ManifestLine; "Manifest Line")
         {
-            DataItemTableView = sorting("Date Received") where("Shortcut Dimension 5 Code" = filter('20FT|40FT'), Received = const(true));
+            DataItemTableView = sorting("Date Received") where("Shortcut Dimension 3 Code" = filter('CONTAINER'), Received = const(true));
             RequestFilterFields = "Global Dimension 1 Code", "Global Dimension 2 Code", "Shortcut Dimension 3 Code", "Shortcut Dimension 4 Code", "Shortcut Dimension 6 Code";
 
             trigger OnPreDataItem()
@@ -25,9 +25,9 @@ report 55037 "Container Movement"
                     MLine.CopyFilters(ManifestLine);
                     MLine.SetRange(Received, true);
                     MLine.SetRange("Date Received", CurrDate);
-                    MLine.SetRange("Shortcut Dimension 5 Code", '20FT');
+                    MLine.SetRange("Container Size", '20FT');
                     Rec20 := MLine.Count();
-                    MLine.SetRange("Shortcut Dimension 5 Code", '40FT');
+                    MLine.SetRange("Container Size", '40FT');
                     Rec40 := MLine.Count();
 
                     // Released that day
@@ -35,9 +35,9 @@ report 55037 "Container Movement"
                     MLine.CopyFilters(ManifestLine);
                     MLine.SetRange(Released, true);
                     MLine.SetRange("Date Released", CurrDate);
-                    MLine.SetRange("Shortcut Dimension 5 Code", '20FT');
+                    MLine.SetRange("Container Size", '20FT');
                     Rel20 := MLine.Count();
-                    MLine.SetRange("Shortcut Dimension 5 Code", '40FT');
+                    MLine.SetRange("Container Size", '40FT');
                     Rel40 := MLine.Count();
 
                     // only write days with movement
