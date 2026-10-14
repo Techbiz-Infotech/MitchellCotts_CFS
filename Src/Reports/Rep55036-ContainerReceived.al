@@ -150,14 +150,24 @@ report 55036 "Container Received"
         // TempExcelBuffer.AddColumn("Sales Invoice Header".Amount, FALSE, '', FALSE, FALSE, FALSE, '', TempExcelBuffer."Cell Type"::Number);
     end;
 
-    Local procedure CreateExcelBook();
+
+    local procedure CreateExcelBook()
+    var
+        TempBlob: Codeunit "Temp Blob";
+        OutStr: OutStream;
+        InStr: InStream;
+        FileName: Text;
     begin
         TempExcelBuffer.CreateNewBook('Container Movement  Received Report');
-        TempExcelBuffer.WriteSheet('Container Movement Received Report', CompanyName, UserId);
-
+        TempExcelBuffer.WriteSheet('Container Movement  Received Report', CompanyName, UserId);
         TempExcelBuffer.CloseBook();
-        TempExcelBuffer.SetFriendlyFilename('Container Movement Received Report');
-        TempExcelBuffer.OpenExcel();
+
+        TempBlob.CreateOutStream(OutStr);
+        TempExcelBuffer.SaveToStream(OutStr, true);
+        TempBlob.CreateInStream(InStr);
+
+        FileName := 'Container Movement  Received Report.xlsx';
+        DownloadFromStream(InStr, '', '', '', FileName);
     end;
 
     // PROCEDURE MergeRange(FromRow: Integer; FromCol: Integer; ToRow: Integer; ToCol: Integer);

@@ -11,7 +11,7 @@ report 55038 "Container Stock"
     {
         dataitem("Manifest Line"; "Manifest Line")
         {
-            DataItemTableView = SORTING("Job File No.") where("Shortcut Dimension 4 Code" = filter('CONTAINER'), Received = const(true));
+            DataItemTableView = SORTING("Job File No.") where("Shortcut Dimension 3 Code" = filter('CONTAINER'), Received = const(true));
             RequestFilterFields = "Global Dimension 1 Code", "Global Dimension 2 Code", "Shortcut Dimension 3 Code", "Shortcut Dimension 5 Code", "Shortcut Dimension 6 Code";
 
             trigger OnPreDataItem()
@@ -147,13 +147,23 @@ report 55038 "Container Stock"
         TempExcelBuffer.AddColumn("Manifest Line"."Shipping Agent", FALSE, '', FALSE, FALSE, FALSE, '', TempExcelBuffer."Cell Type"::text);
     end;
 
-    Local procedure CreateExcelBook();
+    local procedure CreateExcelBook()
+    var
+        TempBlob: Codeunit "Temp Blob";
+        OutStr: OutStream;
+        InStr: InStream;
+        FileName: Text;
     begin
-        TempExcelBuffer.CreateNewBook('Daily Containers Report Stock');
-        TempExcelBuffer.WriteSheet('Daily Containers Report Stock', CompanyName, UserId);
+        TempExcelBuffer.CreateNewBook('Container Stock');
+        TempExcelBuffer.WriteSheet('Container Stock', CompanyName, UserId);
         TempExcelBuffer.CloseBook();
-        TempExcelBuffer.SetFriendlyFilename('Daily Containers Report Stock');
-        TempExcelBuffer.OpenExcel();
+
+        TempBlob.CreateOutStream(OutStr);
+        TempExcelBuffer.SaveToStream(OutStr, true);
+        TempBlob.CreateInStream(InStr);
+
+        FileName := 'Container Stock Report.xlsx';
+        DownloadFromStream(InStr, '', '', '', FileName);
     end;
 
     var

@@ -7,6 +7,7 @@ report 55027 "Container Released"
     UseRequestPage = true;
 
 
+
     dataset
     {
         dataitem("Manifest Line"; "Manifest Line")
@@ -159,13 +160,24 @@ report 55027 "Container Released"
     end;
 
 
-    Local procedure CreateExcelBook();
+
+    local procedure CreateExcelBook()
+    var
+        TempBlob: Codeunit "Temp Blob";
+        OutStr: OutStream;
+        InStr: InStream;
+        FileName: Text;
     begin
         TempExcelBuffer.CreateNewBook('Container Released Report');
         TempExcelBuffer.WriteSheet('Container Released Report', CompanyName, UserId);
         TempExcelBuffer.CloseBook();
-        TempExcelBuffer.SetFriendlyFilename('Container Released Report');
-        TempExcelBuffer.OpenExcel();
+
+        TempBlob.CreateOutStream(OutStr);
+        TempExcelBuffer.SaveToStream(OutStr, true);
+        TempBlob.CreateInStream(InStr);
+
+        FileName := 'Container Released Report.xlsx';
+        DownloadFromStream(InStr, '', '', '', FileName);
     end;
 
     var
