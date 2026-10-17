@@ -172,6 +172,8 @@ page 55077 "Gate Pass Out Card"
                     GatePassLine.SetRange("Gate Pass No.", Rec."Gate Pass No.");
                     if GatepassLine.FindFirst() then
                         repeat
+                            if GatepassLine."No. Of Bags" = 0 then
+                                Error('No. of Bags Must have a value');
                             if GatepassLine."Custom Entry No." = '' then
                                 Error('Custom Entry No. must have a value');
                             if GatepassLine."Shortcut Dimension 4 Code" = 'CONTAINER' then begin

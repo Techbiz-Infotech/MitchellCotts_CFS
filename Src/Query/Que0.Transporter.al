@@ -1,10 +1,10 @@
 query 55004 Transporter
 {
     APIGroup = 'apiGroup';
-    APIPublisher = 'publisherName';
+    APIPublisher = 'TechbizInfoTech';
     APIVersion = 'v1.0';
-    EntityName = 'entityName';
-    EntitySetName = 'entitySetName';
+    EntityName = 'TransporterAPI';
+    EntitySetName = 'TransporterAPI';
     QueryType = API;
 
     elements
@@ -16,6 +16,18 @@ query 55004 Transporter
 
             }
             column(Transporter_Name; "Transporter Name")
+            {
+
+            }
+            column(Vendor_No_; "Vendor No.")
+            {
+
+            }
+            column(Vendor_Name; "Vendor Name")
+            {
+
+            }
+            column(email; email)
             {
 
             }

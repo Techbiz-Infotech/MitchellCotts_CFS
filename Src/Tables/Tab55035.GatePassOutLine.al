@@ -273,6 +273,11 @@ table 55035 "Gate Pass Out Line"
             Caption = 'DO No. Expiry Date';
             DataClassification = ToBeClassified;
         }
+        field(41; "Total Bags"; decimal)
+        {
+            DataClassification = ToBeClassified;
+
+        }
     }
     keys
     {

@@ -178,6 +178,27 @@ table 55007 "Charge ID Assignment"
                 Rec.TestStatusOpen();
             end;
         }
+        field(98; "Process Type Code"; Code[20])
+        {
+            Caption = 'Process Type';
+            TableRelation = "Dimension Value".Code WHERE("Dimension Code" = CONST('PROCESS TYPE'),
+                                                 "Dimension Value Type" = CONST(Standard),
+                                                 Blocked = CONST(false));
+        }
+        field(99; "Client Type Code"; Code[20])
+        {
+            Caption = 'Client Type Code';
+            TableRelation = "Dimension Value".Code WHERE("Dimension Code" = CONST('CLIENT TYPE'),
+                                                 "Dimension Value Type" = CONST(Standard),
+                                                 Blocked = CONST(false));
+        }
+        field(100; "Container Size"; Code[20])
+        {
+            Caption = 'Container Size';
+            TableRelation = "Dimension Value".Code WHERE("Dimension Code" = CONST('CONTAINER SIZE'),
+                                                 "Dimension Value Type" = CONST(Standard),
+                                                 Blocked = CONST(false));
+        }
     }
     keys
     {

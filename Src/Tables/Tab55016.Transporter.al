@@ -26,16 +26,33 @@ table 55016 Transporter
             var
                 Vend: Record Vendor;
             begin
-                if Vend.get("Vendor No.") then
-                    "Vendor Name" := Vend.Name
-                else
+                if Vend.get("Vendor No.") then begin
+                    "Vendor Name" := Vend.Name;
+                    Email := Vend."E-Mail"
+                end
+                else begin
                     "Vendor Name" := '';
+                    Email := '';
+                end;
             end;
         }
         field(4; "Vendor Name"; Text[100])
         {
             Caption = 'Vendor Name';
             DataClassification = ToBeClassified;
+        }
+        field(5; Email; code[50])
+        {
+            DataClassification = ToBeClassified;
+
+        }
+        field(6; "Vehicle No"; code[70])
+        {
+
+        }
+        field(7; "Trailer No"; code[10])
+        {
+
         }
     }
     keys

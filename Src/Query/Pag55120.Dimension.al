@@ -1,7 +1,7 @@
 page 55120 Dimension
 {
     APIGroup = 'apiGroup';
-    APIPublisher = 'TechbizInfoTech';
+    APIPublisher = 'Techbizinfotech';
     APIVersion = 'v1.0';
     ApplicationArea = All;
     Caption = 'dimension';

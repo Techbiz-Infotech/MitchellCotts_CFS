@@ -30,10 +30,15 @@ page 55082 "Charge ID Assignment"
                     ToolTip = 'Specifies the value of the Charge Type field.';
                     ApplicationArea = all;
                 }
-                field("Shortcut Dimension 5 Code"; Rec."Shortcut Dimension 5 Code")
+                field("Process Type Code"; Rec."Process Type Code")
                 {
-                    ToolTip = 'Specifies the value of the Unit Size Container & Vehicle field.';
                     ApplicationArea = All;
+
+                }
+                field("Container Size"; Rec."Container Size")
+                {
+                    ApplicationArea = All;
+
                 }
                 field("Unit Type Container type/Vehic"; Rec."Unit Type Container type/Vehic")
                 {
@@ -45,10 +50,10 @@ page 55082 "Charge ID Assignment"
                     ToolTip = 'Specifies the value of the Destination Local or Transit field.';
                     ApplicationArea = All;
                 }
-                field("Global Dimension 2 Code"; Rec."Global Dimension 2 Code")
+                field("Client Type Code"; Rec."Client Type Code")
                 {
-                    ToolTip = 'Specifies the value of the File Type field.';
                     ApplicationArea = All;
+
                 }
                 field("Effective From Date"; Rec."Effective From Date")
                 {
@@ -207,12 +212,11 @@ page 55082 "Charge ID Assignment"
 
                     trigger OnAction()
                     begin
-                        if (UserId <> 'GROUP.AUDIT') and (UserId <> 'TECHBIZINFOTECH') and (UserId <> 'SHILLAH') then begin
-                            Error('You are not Authorised. Please Contact Group Audit');
-                        end else begin
-                            Rec."Assignment Status" := Rec."Assignment Status"::Released;
-                            Rec.Modify();
-                        end;
+                        // if (UserId <> 'GROUP.AUDIT') and (UserId <> 'TECHBIZINFOTECH') and (UserId <> 'SHILLAH') then begin
+                        //     Error('You are not Authorised. Please Contact Group Audit');
+                        // end else begin
+                        Rec."Assignment Status" := Rec."Assignment Status"::Released;
+                        Rec.Modify();
                     end;
                 }
                 action(Reopen)

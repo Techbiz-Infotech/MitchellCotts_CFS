@@ -177,11 +177,11 @@ page 55069 "Receiving Journal"
                     ToolTip = 'Specifies the value of the Transporter Name field.';
                     ApplicationArea = All;
                 }
-                field("Vehicle Type"; Rec."Vehicle Type")
-                {
-                    ToolTip = 'Specifies the value of the Vehicle Type field.';
-                    ApplicationArea = All;
-                }
+                // field("Vehicle Type"; Rec."Vehicle Type")
+                // {
+                //     ToolTip = 'Specifies the value of the Vehicle Type field.';
+                //     ApplicationArea = All;
+                // }
                 field("Truck /Wagon No."; Rec."Truck /Wagon No.")
                 {
                     ToolTip = 'Specifies the value of the Truck /Wagon No. field.';
@@ -218,11 +218,11 @@ page 55069 "Receiving Journal"
                     ToolTip = 'Specifies the value of the Manifest Line No. field.';
                     ApplicationArea = All;
                 }
-                field("Received By"; Rec."Received By")
-                {
-                    ToolTip = 'Specifies the value of the Received By field.';
-                    ApplicationArea = All;
-                }
+                // field("Received By"; Rec."Received By")
+                // {
+                //     ToolTip = 'Specifies the value of the Received By field.';
+                //     ApplicationArea = All;
+                // }
                 field("Seal No. 1"; Rec."Seal No. 1")
                 {
                     ApplicationArea = All;
@@ -284,9 +284,10 @@ page 55069 "Receiving Journal"
                     rec.TestField("Driver ID");
                     rec.TestField("Driver Name");
                     rec.TestField(Vehicle);
-                    rec.TestField("Vehicle Type");
+                    rec.TestField("Received Quantity");
+                    //rec.TestField("Vehicle Type");
                     rec.TestField("Time In");
-                    rec.TestField("Received By");
+                    //rec.TestField("Received By");
                     rec.TestField(Recieived);
                     rec.TestField("Received Date");
                     rec.TestField("Manifest Line No.");
@@ -354,7 +355,7 @@ page 55069 "Receiving Journal"
                 rec.validate("Shortcut Dimension 5 Code", ManifestLineRec."Shortcut Dimension 5 Code");
                 rec.validate(Description, ManifestLineRec.Description);
                 rec.validate("Job File No.", ManifestLineRec."Job File No.");
-                rec.Validate("Remaining Quantity", ManifestLineRec."No. of Bags");
+                rec.Validate("Remaining Quantity", ManifestLineRec."Rem Received Qty");
                 rec.validate("Manifest Line No.", ManifestLineRec."Line No.");
                 rec.Validate("Global Dimension 1 Code", ManifestLineRec."Global Dimension 1 Code");
                 rec.Validate("Process Type Code", ManifestLineRec."Process Type Code");

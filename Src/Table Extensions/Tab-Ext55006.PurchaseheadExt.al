@@ -14,6 +14,11 @@ tableextension 55006 PurchaseheadExt extends "Purchase Header"
             DataClassification = ToBeClassified;
             //TableRelation = User."User Name";
         }
+        field(50202; "BL No"; code[50])
+        {
+            DataClassification = ToBeClassified;
+
+        }
 
     }
     trigger OnInsert()

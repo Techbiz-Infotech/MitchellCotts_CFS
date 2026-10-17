@@ -288,7 +288,8 @@ table 55005 "Posted Gate Pass Out"
                         ManiRec.Validate("Date Released", Rec."Released Date");
                         ManiRec.Validate("Custom Entry No.", PedningGateOutLine."Custom Entry No.");
                         ManiRec.Validate("GP Delivery Order No.", PedningGateOutLine."Delivery Order No.");
-                        ManiRec.Validate(Released, true);
+                        if ManiRec."Remaining Bags" = 0 then
+                            ManiRec.Validate(Released, true);
                         ManiRec.Modify();
                     until ManiRec.Next() = 0;
             until PedningGateOutLine.Next() = 0;

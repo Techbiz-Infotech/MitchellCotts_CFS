@@ -246,7 +246,7 @@ page 55025 "proforma Invoice"
                             ManiLine.SetRange("Invoicing Party No.", Rec."Sell-to Customer No.");
                             ManiLine.SetRange(Released, false);
                             ManiLine.FindFirst();
-                            if page.RunModal(50122, ManiLine) = Action::LookupOK then begin
+                            if page.RunModal(55043, ManiLine) = Action::LookupOK then begin
                                 if ManiLine."BL No." <> '' then begin
                                     SalesHead.Reset();
                                     SalesHead.SetRange("Document Type", SalesHead."Document Type"::Order);

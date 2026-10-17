@@ -34,7 +34,7 @@ page 55053 "Position Movement Card"
                     ApplicationArea = All;
                     Editable = false;
                 }
-                field("Global Dimension 1 Code"; rec."Global Dimension 1 Code")
+                field("Global Dimension 1 Code"; rec."Shortcut Dimension 4 Code")
                 {
                     ApplicationArea = all;
 
@@ -65,6 +65,11 @@ page 55053 "Position Movement Card"
                     ToolTip = 'Specifies the value of the Machine Operator field.';
                     ApplicationArea = All;
                 }
+                field(Reason; Rec.Reason)
+                {
+                    ApplicationArea = All;
+
+                }
                 field("User ID"; rec."User ID")
                 {
                     ToolTip = 'Specifies the value of the Status field.';
@@ -88,6 +93,7 @@ page 55053 "Position Movement Card"
 
                 begin
                     rec.TestField("Container No./Chassis No.");
+                    rec.TestField(Reason);
                     InsertLog();
                     UpdatePosition();
                     rec.UpdateContainer();
@@ -114,7 +120,6 @@ page 55053 "Position Movement Card"
         PosLog."Activity Type" := PosLog."Activity Type"::Pick;
         PosLog.Qunatity := -1;
         PosLog."Position Code" := Rec."Position From";
-        PosLog."Global Dimension 1 Code" := rec."Global Dimension 1 Code";
         PosLog."Shortcut Dimension 4 Code" := rec."Shortcut Dimension 4 Code";
         PosLog."Container No./Chassis No." := Rec."Container No./Chassis No.";
         PosLog."Entry Type" := PosLog."Entry Type"::"Position Movement";
@@ -130,7 +135,6 @@ page 55053 "Position Movement Card"
             PosLog."Activity Type" := PosLog."Activity Type"::Put;
             PosLog.Qunatity := 1;
             PosLog."Position Code" := Rec."Position To";
-            PosLog."Global Dimension 1 Code" := rec."Global Dimension 1 Code";
             PosLog."Shortcut Dimension 4 Code" := rec."Shortcut Dimension 4 Code";
             PosLog."Container No./Chassis No." := Rec."Container No./Chassis No.";
             PosLog."Entry Type" := PosLog."Entry Type"::"Position Movement";
@@ -155,7 +159,6 @@ page 55053 "Position Movement Card"
         end;
         IF PositionRec.Get(Rec."Position To") then begin
             PositionRec.Status := PositionRec.Status::Allocated;
-            PositionRec."Global Dimension 1 Code" := rec."Global Dimension 1 Code";
             PositionRec."Shortcut Dimension 4 Code" := Rec."Shortcut Dimension 4 Code";
             PositionRec."Container No./Chassis No." := Rec."Container No./Chassis No.";
             PositionRec.Modify();

@@ -114,6 +114,15 @@ page 55213 "Manifest Line Update API"
                 field(processTypeCode; Rec."Process Type Code") { }
                 field(containerSize; Rec."Container Size") { }
                 field(clientTypeCode; Rec."Client Type Code") { }
+                field(remReceivedQty; Rec."Rem Received Qty")
+                {
+                    Caption = 'Rem Received Qty';
+                }
+                field(receivedQuantity; Rec."Received Quantity")
+                {
+                    Caption = 'Received Quantity';
+                }
+
             }
         }
     }

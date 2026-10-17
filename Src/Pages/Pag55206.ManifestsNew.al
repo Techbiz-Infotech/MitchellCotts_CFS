@@ -558,13 +558,14 @@ page 55206 "Manifests New"
             // }
             Action(GatePass)
             {
-                //Visible
+                Caption = 'Rescan Gatepass';
                 trigger OnAction()
                 begin
                     rec.TestField(Rescan);
-
-
+                    CreatePerGatepass;
                 end;
+
+
 
             }
             action("&Import Worksheet")
@@ -852,6 +853,52 @@ page 55206 "Manifests New"
             ContainerLockEdit := false;
         //CurrPage.Update(false);
     end;
+
+    procedure CreatePerGatepass()
+
+    var
+        NoSeriesMgt: Codeunit "No. Series";
+        PrimarySetup: Record "IMS Setup";
+        GPRec: Record "Parent Gatepass";
+        GatepassLine, GPLine : record "Parent Gatepass Line";
+    begin
+        CurrPage.SetSelectionFilter(Rec);
+        GPLine.Reset();
+        GPLine.SetRange("Shortcut Dimension 4 Code", rec."Shortcut Dimension 4 Code");
+        if GPLine.FindFirst() then
+            Error('Rescan Gatepass already created for this Consignment with Reference No. %1', GPLine."Parent Gatepass No.");
+        if not Confirm('Do you want to create the Gatepass?', true) then
+            exit else begin
+            PrimarySetup.Get();
+            GPRec.Init();
+            GPRec.validate("Parent Gatepass No.", NoSeriesMgt.GetNextNo(PrimarySetup."Parent Gatepass Nos", WorkDate(), true));
+            GPRec.Validate("Job File No.", Rec."Job File No.");
+            GPRec.Validate("BL No.", Rec."BL No.");
+            GPRec.validate(Rescan, Rec.Rescan);
+            GPRec.Validate("Activity Date", Today());
+            GPRec.Validate("Activity Time", Time());
+            GPRec.Validate("Global Dimension 1 Code", Rec."Global Dimension 1 Code");
+            GPRec.Validate("Global Dimension 2 Code", Rec."Global Dimension 2 Code");
+            GPRec.Validate("Shortcut Dimension 4 Code", Rec."Shortcut Dimension 4 Code");
+
+            GPRec.Insert(true);
+            GatepassLine.init();
+            GatepassLine."Parent Gatepass No." := GPRec."Parent Gatepass No.";
+            GatepassLine.Validate("Job File No.", Rec."Job File No.");
+            GatepassLine.Validate("BL No.", Rec."BL No.");
+            GatepassLine.Validate("Container /Chasis No.", Rec."Container/Chassis No.");
+            GatepassLine.Validate("Shortcut Dimension 4 Code", Rec."Shortcut Dimension 4 Code");
+            GatepassLine.validate("Consignee No.", Rec."Consignee No.");
+            GatepassLine.Validate("Consignee Name", Rec."Consignee Name");
+            GatepassLine.Validate("Clearing Agent", Rec."Clearing Agent");
+            GatepassLine.Validate("Activity Date", Today());
+            GatepassLine.Validate("Activity Time", Time());
+
+            GatepassLine.insert();
+            Message('Rescan Gatepass %1 successfully Created', GPRec."Parent Gatepass No.");
+        end;
+    end;
+
 
     procedure OnAssistEdit(ManifestRec: Record "Manifest Line"): Boolean
     var

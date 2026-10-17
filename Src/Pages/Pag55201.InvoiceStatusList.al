@@ -347,6 +347,9 @@ page 55201 InvoiceStatusList
                                     GatePassLine."Shortcut Dimension 4 Code" := GManifestLine."Shortcut Dimension 4 Code";
                                     GatePassLine."Shortcut Dimension 5 Code" := GManifestLine."Shortcut Dimension 5 Code";
                                     GatePassLine."Shortcut Dimension 6 Code" := GManifestLine."Shortcut Dimension 6 Code";
+                                    GatePassLine."Total Bags" := GManifestLine."Remaining Bags";
+                                    IF GatePassLine."Shortcut Dimension 3 Code" <> 'LOOSE' THEN
+                                        GatePassLine."No. Of Bags" := GManifestLine."Remaining Bags";
                                     GatePassLine."Job File No" := GManifestLine."Job File No.";
                                     GatePassLine."Container /Chasis No." := GManifestLine."Container/Chassis No.";
                                 end;

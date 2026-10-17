@@ -268,6 +268,11 @@ table 55017 "Parent Gatepass"
                     rec."Container /Chasis No." := '';
             end;
         }
+        field(53; Rescan; boolean)
+        {
+            DataClassification = ToBeClassified;
+            Editable = false;
+        }
 
     }
     keys
@@ -379,6 +384,7 @@ table 55017 "Parent Gatepass"
                 ManifestLine.Reset();
                 ManifestLine.SetRange("BL No.", MGPOLine."BL No.");
                 ManifestLine.SetRange("Shortcut Dimension 4 Code", MGPOLine."Shortcut Dimension 4 Code");
+
                 if ManifestLine.FindFirst() then begin
                     ManifestLine.Released := true;
                     ManifestLine."Date Released" := Today;

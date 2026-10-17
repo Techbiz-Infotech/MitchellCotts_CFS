@@ -69,12 +69,12 @@ table 55020 "Position Movement"
             Caption = 'No.series';
             DataClassification = ToBeClassified;
         }
-        field(39; "Global Dimension 1 Code"; Code[20])
+        field(39; "Shortcut Dimension 4 Code"; Code[20])
         {
-            Caption = 'Global Dimension 1 Code';
-            DataClassification = ToBeClassified;
-            CaptionClass = '1,1,1';
-            TableRelation = "Dimension Value".Code WHERE("Global Dimension No." = CONST(1));
+            CaptionClass = '1,2,4';
+            TableRelation = "Dimension Value".Code WHERE("Global Dimension No." = CONST(4),
+                                                                  "Dimension Value Type" = CONST(Standard),
+                                                                  Blocked = CONST(false));
             trigger OnValidate()
             var
                 DimValueRec: Record "Dimension Value";
@@ -120,13 +120,12 @@ table 55020 "Position Movement"
             DataClassification = ToBeClassified;
             TableRelation = User."User Name";
         }
-        field(44; "Shortcut Dimension 4 Code"; Code[20])
+        field(44; Reason; text[100])
         {
-            CaptionClass = '1,2,4';
-            TableRelation = "Dimension Value".Code WHERE("Global Dimension No." = CONST(4),
-                                                                  "Dimension Value Type" = CONST(Standard),
-                                                                  Blocked = CONST(false));
+            Caption = 'Reason';
+            DataClassification = ToBeClassified;
         }
+
 
     }
     keys

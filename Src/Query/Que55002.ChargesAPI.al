@@ -8,7 +8,10 @@ Page 55209 "Charges API"
     EntitySetName = 'ChargesAPI';
     DelayedInsert = true;
     ModifyAllowed = true;
+    InsertAllowed = true;
     SourceTable = "Charge ID Group Header";
+    ODataKeyFields = SystemId;
+
 
 
     Layout
@@ -63,10 +66,11 @@ Page 55209 "Charges API"
             {
                 Caption = 'Status';
             }
+            field(SystemId; Rec.SystemId) { }
 
             part(Lines; "Charge Line API")
             {
-                EntityName = 'line';
+                EntityName = 'lines';
                 EntitySetName = 'lines';
 
                 SubPageLink = "Charge ID Group Code" = field("Charge ID Group Code");
@@ -83,7 +87,7 @@ page 55210 "Charge Line API"
     APIGroup = 'apiGroup';
     APIVersion = 'v1.0';
     Caption = 'Charge Line API';
-    EntityName = 'line';
+    EntityName = 'lines';
     EntitySetName = 'lines';
     ODataKeyFields = SystemId;
 

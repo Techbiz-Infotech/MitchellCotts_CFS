@@ -162,12 +162,9 @@ page 55071 "Charge ID Group"
 
                     trigger OnAction()
                     begin
-                        if (UserId <> 'GROUP.AUDIT') and (UserId <> 'TECHBIZINFOTECH') and (UserId <> 'SHILLAH') then begin
-                            Error('You are not Authorised. Please Contact Group Audit');
-                        end else begin
-                            Rec.Status := Rec.Status::Released;
-                            Rec.Modify();
-                        end;
+
+                        Rec.Status := Rec.Status::Released;
+                        Rec.Modify();
                     end;
                 }
                 action(Reopen)

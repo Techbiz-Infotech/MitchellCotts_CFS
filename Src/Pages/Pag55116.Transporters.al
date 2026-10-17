@@ -32,6 +32,12 @@ page 55116 Transporters
                     ApplicationArea = All;
                     ToolTip = 'Specifies the value of the Vendor Name field.';
                 }
+                field(Email; Rec.Email)
+                {
+                    ApplicationArea = All;
+
+
+                }
             }
         }
     }

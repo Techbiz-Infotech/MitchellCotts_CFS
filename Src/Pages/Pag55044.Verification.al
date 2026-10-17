@@ -12,22 +12,26 @@ page 55044 VerificationList
         {
             group(General)
             {
-                field("BLNo"; "BLNo")
+                field("CNNo"; "CNno")
                 {
                     ApplicationArea = all;
-                    Caption = 'BL No.';
+                    Caption = 'Container No.';
 
                     trigger OnLookup(var text: text): Boolean
                     var
                         ManiLine: Record "Manifest Line";
+                        ManiLinePage: Page "Manifests New";
+
                     begin
                         ManiLine.Reset();
                         ManiLine.SetRange(Received, true);
                         ManiLine.SetRange(Verified, false);
                         ManiLine.SetRange(Released, false);
-                        ManiLine.FindFirst();
-                        if Page.RunModal(55043, ManiLine) = Action::LookupOK then begin
-                            Text := ManiLine."BL No.";
+                        ManiLinePage.SetTableView(ManiLine);
+                        ManiLinePage.LookupMode(true);
+                        if ManiLinePage.RunModal() = Action::LookupOK then begin
+                            ManiLinePage.GetRecord(ManiLine);
+                            Text := ManiLine."Shortcut Dimension 4 Code";
                             exit(true);
                         end;
                         exit(false);
@@ -186,6 +190,7 @@ page 55044 VerificationList
 
                 begin
                     rec.TestField(Verified, true);
+                    rec.TestField("Verification Type");
                     IF Confirm('Do you want to Print & Post the Verification?', true) then begin
                         UpdateManifest();
                         InsertLog();
@@ -204,7 +209,7 @@ page 55044 VerificationList
         }
     }
     var
-        BLNo: Code[20];
+        CNno: Code[20];
         ManiLines: Record "Manifest Line";
         VerLogRec2: Record VerificationLog;
         VerificationReport: Report "Custom Verification Order NICT";
@@ -243,7 +248,7 @@ page 55044 VerificationList
     begin
         rec.DeleteAll();
         ManifestLineRec.Reset();
-        ManifestLineRec.SetRange(ManifestLineRec."BL No.", BLNo);
+        ManifestLineRec.SetRange(ManifestLineRec."Shortcut Dimension 4 Code", CNNo);
         ManifestLineRec.setrange(ManifestLineRec.Manifested, true);
         ManifestLineRec.SetRange(ManifestLineRec.Received, true);
         ManifestLineRec.SetRange(ManifestLineRec.Verified, false);
@@ -277,7 +282,7 @@ page 55044 VerificationList
                 LineNo += 1;
             until ManifestLineRec.Next = 0;
         end;
-        clear(BLNo);
+        clear(CNNo);
         CurrPage.Update(false);
     end;
 

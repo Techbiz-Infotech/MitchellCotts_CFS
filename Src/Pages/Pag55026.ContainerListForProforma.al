@@ -47,9 +47,8 @@ page 55026 ContainerListForProforma
                     ApplicationArea = All;
                     Editable = false;
                 }
-                field("Shortcut Dimension 5 Code"; rec."Shortcut Dimension 5 Code")
+                field("Container Size"; Rec."Container Size")
                 {
-                    ToolTip = 'Specifies the value of the Container Size field.';
                     ApplicationArea = All;
                     Editable = false;
                 }
@@ -1408,9 +1407,9 @@ page 55026 ContainerListForProforma
 
         ChargeIDAssRec.reset();
         ChargeIDAssRec.SetRange("Customer No.", NewCustNo);
-        ChargeIDAssRec.SetRange("Global Dimension 2 Code", MFL."Global Dimension 2 Code");
+        ChargeIDAssRec.SetRange("Client Type Code", MFL."Client Type Code");
         ChargeIDAssRec.SetRange(ChargeIDAssRec."Unit Type Container type/Vehic", MFL."Container Type");
-        ChargeIDAssRec.SetRange(ChargeIDAssRec."Shortcut Dimension 5 Code", MFL."Shortcut Dimension 5 Code");
+        ChargeIDAssRec.SetRange(ChargeIDAssRec."Container Size", MFL."Container Size");
         ChargeIDAssRec.SetRange(ChargeIDAssRec."Clearing Agent Code", MFL."Clearing Agent");
         ChargeIDAssRec.SetRange("Destination Local or Transit", MFL."Destination Type");
         ChargeIDAssRec.SetFilter("Effective From Date", '<=%1', MFL."Date Received");

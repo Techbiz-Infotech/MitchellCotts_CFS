@@ -30,7 +30,7 @@ page 55056 PositionMovementList
                     ToolTip = 'Specifies the value of the Movement Time field.';
                     ApplicationArea = All;
                 }
-                field("Global Dimension 1 Code"; rec."Global Dimension 1 Code")
+                field("Global Dimension 1 Code"; rec."Shortcut Dimension 4 Code")
                 {
                     ApplicationArea = all;
                 }
