@@ -15,6 +15,9 @@ report 55043 "Monthly Report MV"
             column(JobFileNo; "Job File No.")
             {
             }
+            column(expectedarrivaldate; "Expected Arrival Date")
+            {
+            }
             column(receivedDate; "Date Received")
             {
             }
